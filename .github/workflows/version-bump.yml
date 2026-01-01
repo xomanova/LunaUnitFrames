@@ -34,11 +34,8 @@ jobs:
           for file in $CHANGED_FILES; do
             case "$file" in
               *.lua|*.xml|*.toc|locales/*|media/*|modules/*)
-                # But exclude the TOC if it's the only change (avoid infinite loop)
-                if [ "$file" != "LunaUnitFrames.toc" ]; then
-                  ADDON_MODIFIED=true
-                  break
-                fi
+                ADDON_MODIFIED=true
+                break
                 ;;
             esac
           done
