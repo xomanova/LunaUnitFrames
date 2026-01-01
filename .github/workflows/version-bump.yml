@@ -1,0 +1,95 @@
+name: Auto Version Bump
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - main
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+    # Only run if the PR is not from a fork (forks can't push back)
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: write
+      pull-requests: read
+    
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if addon files were modified
+        id: check_files
+        run: |
+          # Get the list of changed files in this PR compared to base
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD)
+          
+          # Define addon file patterns (exclude workflows, docs, etc.)
+          ADDON_MODIFIED=false
+          for file in $CHANGED_FILES; do
+            case "$file" in
+              *.lua|*.xml|*.toc|locales/*|media/*|modules/*)
+                # But exclude the TOC if it's the only change (avoid infinite loop)
+                if [ "$file" != "LunaUnitFrames.toc" ]; then
+                  ADDON_MODIFIED=true
+                  break
+                fi
+                ;;
+            esac
+          done
+          
+          echo "addon_modified=${ADDON_MODIFIED}" >> $GITHUB_OUTPUT
+          echo "Addon files modified: ${ADDON_MODIFIED}"
+
+      - name: Check if version was already bumped in this PR
+        id: check_bumped
+        if: steps.check_files.outputs.addon_modified == 'true'
+        run: |
+          # Get the version from the base branch
+          BASE_VERSION=$(git show origin/${{ github.event.pull_request.base.ref }}:LunaUnitFrames.toc | grep -E "^## Version:" | sed 's/## Version: *//')
+          
+          # Get the current version in the PR
+          CURRENT_VERSION=$(grep -E "^## Version:" LunaUnitFrames.toc | sed 's/## Version: *//')
+          
+          echo "Base version: ${BASE_VERSION}"
+          echo "Current version: ${CURRENT_VERSION}"
+          
+          if [ "$CURRENT_VERSION" != "$BASE_VERSION" ]; then
+            echo "Version already bumped in this PR"
+            echo "already_bumped=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version needs to be bumped"
+            echo "already_bumped=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Increment version
+        id: increment
+        if: steps.check_files.outputs.addon_modified == 'true' && steps.check_bumped.outputs.already_bumped == 'false'
+        run: |
+          # Get current version
+          CURRENT_VERSION=$(grep -E "^## Version:" LunaUnitFrames.toc | sed 's/## Version: *//')
+          
+          # Increment version
+          NEW_VERSION=$((CURRENT_VERSION + 1))
+          
+          echo "Bumping version from ${CURRENT_VERSION} to ${NEW_VERSION}"
+          
+          # Update the TOC file
+          sed -i "s/^## Version: .*/## Version: ${NEW_VERSION}/" LunaUnitFrames.toc
+          
+          echo "new_version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Commit version bump
+        if: steps.check_files.outputs.addon_modified == 'true' && steps.check_bumped.outputs.already_bumped == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add LunaUnitFrames.toc
+          git commit -m "chore: Bump version to ${{ steps.increment.outputs.new_version }}"
+          git push
