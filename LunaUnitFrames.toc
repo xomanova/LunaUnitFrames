@@ -1,12 +1,11 @@
 ## Interface: 11508
 ## Title: Luna Unit Frames
-## Notes: 
-## Author: Aviana
-## Version: 4330
+## Notes: A descendent of ElvUI -> oUF
+## Author: Aviana,Xomanova
+## Version: 4331
 ## SavedVariables: LunaUFDB
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, Clique
 ## X-License: WTFPL (http://www.wtfpl.net/about/)
-## X-Donate: paypal.me/LunaUnitFrames
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua
