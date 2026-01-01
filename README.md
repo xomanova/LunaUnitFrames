@@ -1,40 +1,53 @@
-- DEVELOMENT HAS STOPPED SINCE I NO LONGER PLAY THE GAME -
-
 # LunaUnitFrames
-Unit Frames for WoW Classic
 
-LunaUnitFrames supports/recommends WowUp.io for automatic updates: https://wowup.io/
+A comprehensive and highly customizable unit frames addon for **WoW Classic Era** (Patch 1.15.8).
 
--External support-
+![Player and Party Frames](assets/player-party.png)
 
-Clickcasting:
-https://www.wowinterface.com/downloads/info5108-Clique.html
+## Features
 
-Numeric timers on auras:
-https://www.wowinterface.com/downloads/info4836-OmniCC.html
+### Unit Frames
+- **Player, Target, Target of Target** frames with full customization
+- **Party frames** with configurable layout
+- **Raid frames** optimized for 40-man raids
+- **Pet, Focus, and Boss** frames
 
-Additional Bar Textures & Fonts:
-https://www.wowinterface.com/downloads/search.php?search=sharedmedia
-https://addons.wago.io/?search=sharedmedia
+![Raid Frames](assets/raid.png)
 
-This addon comes with LibClassicDurations integrated to view aura durations,
+### Core Features
+- **Config mode** for easy visual setup and positioning
+- **Healing prediction** via LibHealComm-4.0 integration
+- **Aura durations** powered by LibClassicDurations
+- **Enemy and friendly castbars** using LibClassicCasterino
+- **Energy / MP5 ticker** for resource management
+- **Druid mana bar** - track mana while shapeshifted
+- **Reckoning tracker** for Paladin stacks
+- **Totem timer** for Shaman totems
+- **Mana cost prediction** on the power bar
 
-Other features include:
+### Customization
+- Fully configurable bar textures and fonts via LibSharedMedia
+- Adjustable frame sizes, positions, and layouts
+- Customizable aura filtering and display
+- Class-colored health bars
+- Portrait options (2D, 3D, class icons)
 
-- Config mode for easy setup
-- Enemy (and friendly) castbars (LibClassicCasterino)
-- Energy / MP5 ticker
-- Druid mana bar
-- Reckoning tracker
-- Healing communication (LibHealComm-4.0)
-- Totem timer
-- Mana cost prediction
-and much more
+## Installation
 
+1. Download the latest release
+2. Extract to your `Interface/AddOns` folder
+3. Ensure the folder is named `LunaUnitFrames`
 
-DO NOT REUPLOAD! LINK HERE INSTEAD.
+## Configuration
 
+Type `/luna` or `/luf` in-game to open the configuration panel.
 
-paypal.me/LunaUnitFrames
+## Recommended Companion Addons
 
-Donations are non-refundable / don't entitle you to anything
+- [Clique](https://www.wowinterface.com/downloads/info5108-Clique.html) - Click-casting support
+
+## Compatibility
+
+- **WoW Classic Era** - Interface 11508 (Patch 1.15.8)
+
+This addon is **not** compatible with Retail, Cataclysm Classic, or other Classic variants
