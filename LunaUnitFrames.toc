@@ -17,7 +17,6 @@ libs\AceDBOptions-3.0\AceDBOptions-3.0.xml
 libs\AceGUI-3.0\AceGUI-3.0.xml
 libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
 libs\AceConfig-3.0\AceConfig-3.0.xml
-libs\LibVexation-1.0\lib.xml
 libs\LibHealComm-4.0\LibHealComm-4.0.xml
 libs\LibAuraTypes\LibAuraTypes.lua
 libs\LibSpellLocks\LibSpellLocks.lua
@@ -37,10 +36,8 @@ libs\oUF\colors.lua
 libs\oUF\elements\additionalpower.lua
 libs\oUF\elements\assistantindicator.lua
 libs\oUF\elements\castbar.lua
-libs\oUF\elements\happinessindicator.lua
 libs\oUF\elements\health.lua
 libs\oUF\elements\leaderindicator.lua
-libs\oUF\elements\masterlooterindicator.lua
 libs\oUF\elements\power.lua
 libs\oUF\elements\powerprediction.lua
 libs\oUF\elements\pvpindicator.lua

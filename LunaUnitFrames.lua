@@ -196,6 +196,8 @@ function LUF:LoadoUFSettings()
 	self.oUF.colors.power.COMBO_POINTS = {colors.COMBOPOINTS.r, colors.COMBOPOINTS.g, colors.COMBOPOINTS.b}
 	self.oUF.colors.power[4] = self.oUF.colors.power.COMBOPOINTS
 	
+	-- Initialize happiness colors table (for pet happiness in Classic Era)
+	self.oUF.colors.happiness = self.oUF.colors.happiness or {}
 	self.oUF.colors.happiness[1] = {colors.unhappy.r, colors.unhappy.g, colors.unhappy.b}
 	self.oUF.colors.happiness[2] = {colors.content.r, colors.content.g, colors.content.b}
 	self.oUF.colors.happiness[3] = {colors.happy.r, colors.happy.g, colors.happy.b}
