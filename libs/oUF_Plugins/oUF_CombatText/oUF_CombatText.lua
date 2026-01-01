@@ -36,7 +36,9 @@ local function Update(self, event, unit)
 		element:PreUpdate()
 	end
 
-	element.feedbackText:SetFont(element.font, element.feedbackFontHeight, "OUTLINE")
+	local font = element.font or "Fonts\\FRIZQT__.TTF"
+	local fontHeight = element.feedbackFontHeight or 10
+	element.feedbackText:SetFont(font, fontHeight, "OUTLINE")
 
 	--[[ Callback: CombatText:PostUpdate(object)
 	Called after the element has been updated.

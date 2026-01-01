@@ -77,7 +77,15 @@ local function Update(self, event)
 		element:PreUpdate()
 	end
 
-	local hasMouseover = self == GetMouseFocus()
+	-- GetMouseFocus() was replaced with GetMouseFoci() in Classic Era 1.15.x
+	local mouseFoci = GetMouseFoci and GetMouseFoci() or (GetMouseFocus and {GetMouseFocus()} or {})
+	local hasMouseover = false
+	for _, frame in ipairs(mouseFoci) do
+		if frame == self then
+			hasMouseover = true
+			break
+		end
+	end
 	local isTarget = UnitIsUnit("target", unit)
 	local hasAggro = (UnitThreatSituation(unit) or 0) > 1
 	local showOwn, showAll, hasDebuff, highlightReason = element.debuff == 2, element.debuff == 3
