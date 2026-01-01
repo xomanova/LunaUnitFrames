@@ -4115,7 +4115,7 @@ function LUF:CreateConfig()
 						order = 1,
 					},
 					descriptiontext = {
-						name = "Luna Unit Frames by Aviana\nDonate: paypal.me/LunaUnitFrames\n".."Version: "..LUF.version,
+						name = "Luna Unit Frames by Xoma\n".."Version: "..LUF.version,
 						type = "description",
 						width = "full",
 						order = 2,
