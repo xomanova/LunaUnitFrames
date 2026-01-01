@@ -1,0 +1,101 @@
+name: Package and Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      skip_upload:
+        description: 'Skip uploading to distribution sites'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version info
+        id: version
+        run: |
+          INTERFACE=$(grep -E "^## Interface:" LunaUnitFrames.toc | sed 's/## Interface: *//')
+          ADDON_VERSION=$(grep -E "^## Version:" LunaUnitFrames.toc | sed 's/## Version: *//')
+          COMMIT_SHORT=$(git rev-parse --short HEAD)
+          echo "interface=${INTERFACE}" >> $GITHUB_OUTPUT
+          echo "addon_version=${ADDON_VERSION}" >> $GITHUB_OUTPUT
+          echo "commit_short=${COMMIT_SHORT}" >> $GITHUB_OUTPUT
+
+      - name: Build and Package Addon
+        uses: BigWigsMods/packager@v2
+        with:
+          args: -d -z
+        # -d = skip uploading (we'll do our own release)
+        # -z = skip zip (we want to control the package ourselves for now)
+
+      - name: Create release package
+        id: package
+        run: |
+          VERSION="v${{ steps.version.outputs.addon_version }}-ui${{ steps.version.outputs.interface }}-${{ steps.version.outputs.commit_short }}"
+          PACKAGE_NAME="LunaUnitFrames-${VERSION}"
+          
+          # The packager creates .release/LunaUnitFrames
+          if [ -d ".release/LunaUnitFrames" ]; then
+            cd .release
+            zip -r "../${PACKAGE_NAME}.zip" "LunaUnitFrames"
+            cd ..
+            echo "package_name=${PACKAGE_NAME}" >> $GITHUB_OUTPUT
+            echo "package_file=${PACKAGE_NAME}.zip" >> $GITHUB_OUTPUT
+            echo "tag_name=${VERSION}" >> $GITHUB_OUTPUT
+            echo "✅ Package created: ${PACKAGE_NAME}.zip"
+            ls -la "${PACKAGE_NAME}.zip"
+          else
+            echo "❌ Package directory not found"
+            exit 1
+          fi
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.package_name }}
+          path: ${{ steps.package.outputs.package_file }}
+          retention-days: 30
+
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.package.outputs.tag_name }}
+          name: "LunaUnitFrames ${{ steps.package.outputs.tag_name }}"
+          body: |
+            ## LunaUnitFrames ${{ steps.package.outputs.tag_name }}
+            
+            **Game Version:** vanilla (WoW Classic Era)
+            **Interface:** ${{ steps.version.outputs.interface }}
+            **Addon Version:** ${{ steps.version.outputs.addon_version }}
+            
+            ### Installation
+            1. Download `${{ steps.package.outputs.package_file }}`
+            2. Extract to your `World of Warcraft/_classic_era_/Interface/AddOns/` folder
+            3. Restart WoW or reload your UI
+            
+            ### Compatibility
+            This release is for **WoW Classic Era** (Patch 1.15.x) only.
+          files: ${{ steps.package.outputs.package_file }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

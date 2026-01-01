@@ -39,8 +39,8 @@ RaidStatusIndicators - A `table` containing frames with a .texture to show the s
 local _, ns = ...
 local oUF = ns.oUF
 
-local lCD = LibStub("LibClassicDurations")
-local Vex = LibStub("LibVexation-1.0")
+local lCD = LibStub("LibClassicDurations", true)
+local Vex = LibStub("LibVexation-1.0", true)
 
 local playerClass = select(2, UnitClass("player"))
 local canCure = {}
