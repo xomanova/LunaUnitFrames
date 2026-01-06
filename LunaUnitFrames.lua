@@ -446,7 +446,7 @@ function LUF:HideBlizzardFrames()
 			end
 			
 			hooksecurefunc("CompactRaidFrameManager_UpdateShown", function()
-				if( LUF.db.profile.hidden.raid ) then
+				if( LUF.db and LUF.db.profile and LUF.db.profile.hidden and LUF.db.profile.hidden.raid ) then
 					hideRaid()
 				end
 			end)

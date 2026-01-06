@@ -44,7 +44,8 @@ local function Update(self, event)
 	end
 
 	local isShown = false
-	if(UnitInParty(unit) or UnitInRaid(unit)) then
+	-- GetLootMethod was removed in Classic Era (Master Loot no longer exists)
+	if(GetLootMethod and (UnitInParty(unit) or UnitInRaid(unit))) then
 		local method, partyIndex, raidIndex = GetLootMethod()
 		if(method == 'master') then
 			local mlUnit
