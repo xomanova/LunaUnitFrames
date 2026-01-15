@@ -39,9 +39,18 @@ the unit.
 local _, ns = ...
 local oUF = ns.oUF
 
-local lCD = LibStub("LibClassicDurations")
+local lCD = LibStub("LibClassicDurations", true)
 local LAT = LibStub("LibAuraTypes")
 local SL = LibStub("LibSpellLocks")
+
+-- Wrapper function to use LCD if available, otherwise fall back to native UnitAura
+local function UnitAuraWrapper(unit, index, filter)
+	if lCD then
+		return lCD:UnitAura(unit, index, filter)
+	else
+		return UnitAura(unit, index, filter)
+	end
+end
 
 local function cutTexture(texture)
 	local height = texture:GetHeight()
@@ -78,7 +87,7 @@ local function Update(self, event, unit)
 		icon, duration, expirationTime = select(3,SL:GetSpellLockInfo(unit))
 		if not icon then
 			for i=1, 32 do
-				local name, tmpicon, _, _, tmpduration, tmpexpirationTime, _, _, _, spellId = lCD:UnitAura(unit, i, "HELPFUL")
+				local name, tmpicon, _, _, tmpduration, tmpexpirationTime, _, _, _, spellId = UnitAuraWrapper(unit, i, "HELPFUL")
 				if not name then break end
 				local prio = LAT.GetAuraInfo(spellId, UnitCanAttack("player",unit))
 				if prio and prio > maxPrio and prio >= PRIO_SILENCE then
@@ -89,7 +98,7 @@ local function Update(self, event, unit)
 				end
 			end
 			for i=1, 16 do
-				local name, tmpicon, _, _, tmpduration, tmpexpirationTime, _, _, _, spellId = lCD:UnitAura(unit, i, "HARMFUL")
+				local name, tmpicon, _, _, tmpduration, tmpexpirationTime, _, _, _, spellId = UnitAuraWrapper(unit, i, "HARMFUL")
 				if not name then break end
 				local prio = LAT.GetAuraInfo(spellId, UnitCanAttack("player",unit))
 				if prio and prio > maxPrio and prio >= PRIO_SILENCE then
