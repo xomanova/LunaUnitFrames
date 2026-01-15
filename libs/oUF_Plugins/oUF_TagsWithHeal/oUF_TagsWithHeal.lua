@@ -133,8 +133,8 @@ local _ENV = {
 			rawset(tbl, val, val)
 			return val
 	end}),
-	UnitCastingInfo = function(unit) return LCC:UnitCastingInfo(unit) end,
-	UnitChannelInfo = function(unit) return LCC:UnitChannelInfo(unit) end,
+	UnitCastingInfo = function(unit) if LCC then return LCC:UnitCastingInfo(unit) else return UnitCastingInfo(unit) end end,
+	UnitChannelInfo = function(unit) if LCC then return LCC:UnitChannelInfo(unit) else return UnitChannelInfo(unit) end end,
 	RARE = strmatch(GARRISON_MISSION_RARE,"%a*"),
 	GHOST = GetSpellInfo(8326),
 	LHC = LHC,

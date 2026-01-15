@@ -417,7 +417,7 @@ local function Enable(self)
 
 		self:RegisterEvent("UNIT_AURA", Path)
 		self:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE", Path)
-		self:RegisterEvent("LEARNED_SPELL_IN_TAB", checkCurableSpells, true)
+		self:RegisterEvent("SPELLS_CHANGED", checkCurableSpells, true)
 		self:RegisterEvent("PLAYER_LOGIN", checkCurableSpells, true)
 		self:RegisterEvent("UNIT_PET", checkCurableSpells, true)
 
@@ -438,7 +438,7 @@ local function Disable(self)
 
 		self:UnregisterEvent("UNIT_AURA", Path)
 		self:UnregisterEvent("UNIT_THREAT_SITUATION_UPDATE", Path)
-		self:UnregisterEvent("LEARNED_SPELL_IN_TAB", checkCurableSpells)
+		self:UnregisterEvent("SPELLS_CHANGED", checkCurableSpells)
 		self:UnregisterEvent("PLAYER_LOGIN", checkCurableSpells)
 		self:UnregisterEvent("UNIT_PET", checkCurableSpells)
 		
