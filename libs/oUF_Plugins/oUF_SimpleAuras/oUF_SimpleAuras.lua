@@ -833,7 +833,7 @@ local function Enable(self)
 			playerFrames[self] = self
 			self:RegisterEvent("UNIT_INVENTORY_CHANGED", SetWeaponUpdateTimer)
 			UpdateWeaponEnchants(self, true)
-		elseif self.unit ~= "player" then
+		elseif self.unit ~= "player" and LCD then
 			LCD.RegisterCallback("LUF", "UNIT_BUFF", function(event, unit)
 				UpdateAuras(element, "UNIT_AURA", unit)
 			end)
