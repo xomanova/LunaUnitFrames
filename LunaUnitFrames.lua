@@ -1,7 +1,7 @@
 -- Luna Unit Frames
 
 LUF = select(2, ...)
-LUF.version = tonumber(GetAddOnMetadata("LunaUnitFrames", "Version")) or 0
+LUF.version = tonumber(C_AddOns.GetAddOnMetadata("LunaUnitFrames", "Version")) or 0
 
 local L = LUF.L
 local ACR = LibStub("AceConfigRegistry-3.0", true)

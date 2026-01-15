@@ -1,18 +1,19 @@
 # Copilot Instructions for LunaUnitFrames
 
-## WoW Classic Era API Version
+## WoW Classic TBC API Version
 
-This addon targets **WoW Classic Era** with Interface version **11508** (Patch 1.15.8).
+This addon targets **WoW Classic Anniversary - The Burning Crusade** with Interface version **20505** (Patch 2.5.5).
 
 ## API Guidelines
 
-When writing or modifying Lua code for this addon, only use UI elements and API functions that are available in WoW Classic Era 1.15.x. Do NOT use APIs from:
+When writing or modifying Lua code for this addon, only use UI elements and API functions that are available in TBC Classic 2.5.x. Do NOT use APIs from:
 - Retail WoW (The War Within, Dragonflight, etc.)
 - Cataclysm Classic
 - Wrath of the Lich King Classic
 - Mists of Pandaria Classic
+- WoW Classic Era (Vanilla 1.15.x - some APIs differ)
 
-## Available APIs (Classic Era 1.15.x)
+## Available APIs (TBC Classic 2.5.x)
 
 ### Aura Functions
 Use the legacy aura API functions:
@@ -20,11 +21,20 @@ Use the legacy aura API functions:
 - `UnitBuff(unit, index, filter)` - Wrapper for UnitAura with "HELPFUL" filter
 - `UnitDebuff(unit, index, filter)` - Wrapper for UnitAura with "HARMFUL" filter
 
+Note: TBC provides native aura duration information, so LibClassicDurations is not required.
+
 Do NOT use:
 - `C_UnitAuras` namespace (Retail only)
 - `AuraUtil.ForEachAura()` (Retail only)
 - `GetAuraDataByIndex()` (Retail only)
 - `GetAuraDataBySlot()` (Retail only)
+
+### Addon Metadata
+Use the TBC/modern API:
+- `C_AddOns.GetAddOnMetadata(addonName, field)` - Returns metadata from TOC file
+
+Do NOT use:
+- `GetAddOnMetadata()` (deprecated in TBC Classic)
 
 ### Spell Functions
 Use the legacy spell API:
@@ -39,7 +49,7 @@ Do NOT use:
 
 ### Frame/Widget API
 Use classic widget methods:
-- `SetBackdrop()` - Still available in Classic Era
+- `SetBackdrop()` - Still available in TBC Classic
 - `SetBackdropColor()`
 - `SetBackdropBorderColor()`
 
@@ -47,7 +57,7 @@ Do NOT use:
 - `BackdropTemplateMixin` (use direct SetBackdrop instead)
 
 ### Unit Functions
-Available in Classic Era:
+Available in TBC Classic:
 - `UnitName(unit)`
 - `UnitHealth(unit)` / `UnitHealthMax(unit)`
 - `UnitPower(unit)` / `UnitPowerMax(unit)`
@@ -63,7 +73,7 @@ Available in Classic Era:
 - `UnitAffectingCombat(unit)`
 
 ### Events
-Use Classic Era events. Some events that exist in Retail may not exist or have different payloads in Classic Era.
+Use TBC Classic events. Some events that exist in Retail may not exist or have different payloads in TBC Classic.
 
 ### Libraries
 This addon uses these compatible libraries:
@@ -72,13 +82,14 @@ This addon uses these compatible libraries:
 - LibSharedMedia-3.0
 - AceDB-3.0 / AceConfig-3.0 / AceGUI-3.0
 - LibHealComm-4.0 (Classic-specific healing prediction)
-- LibClassicDurations (Classic-specific aura durations)
 - LibClassicCasterino (Classic-specific cast bar info)
 - oUF (Unit Frame framework)
+
+Note: LibClassicDurations is optional and not needed in TBC as duration info is provided natively.
 
 ## Code Style
 
 - Follow existing code patterns in the addon
 - Use `select(2, ...)` for addon namespace access
 - Prefer local variables for performance
-- Use existing library wrappers (like `lCD:UnitAura()` from LibClassicDurations) when available for enhanced functionality
+- Use native `UnitAura()` for aura information (TBC provides duration info natively)

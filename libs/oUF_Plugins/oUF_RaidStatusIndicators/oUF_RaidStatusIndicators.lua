@@ -42,6 +42,15 @@ local oUF = ns.oUF
 local lCD = LibStub("LibClassicDurations", true)
 local Vex = LibStub("LibVexation-1.0", true)
 
+-- Wrapper function to use LCD if available, otherwise fall back to native UnitAura
+local function UnitAuraWrapper(unit, index, filter)
+	if lCD then
+		return lCD:UnitAura(unit, index, filter)
+	else
+		return UnitAura(unit, index, filter)
+	end
+end
+
 local playerClass = select(2, UnitClass("player"))
 local canCure = {}
 local cures = {
@@ -58,7 +67,7 @@ local function checkDispel(unit)
 	local i, name, _, _, debuffType = 1, UnitDebuff(unit, 1)
 	while name do
 		if canCure[debuffType] then
-			return lCD:UnitAura(unit, i, "HARMFUL")
+			return UnitAuraWrapper(unit, i, "HARMFUL")
 		end
 		i = i + 1
 		name, _, _, debuffType = UnitDebuff(unit, i)

@@ -1,13 +1,13 @@
 # Game Version
 
-This addon is built for **WoW Classic Era** (Vanilla).
+This addon is built for **WoW Classic Anniversary - The Burning Crusade**.
 
 | Property | Value |
 |----------|-------|
-| Game Version | **vanilla** |
-| Client | Classic Era |
-| Interface Version | 11508 |
-| Patch | 1.15.8 |
+| Game Version | **tbc** |
+| Client | Classic Anniversary (TBC) |
+| Interface Version | 20505 |
+| Patch | 2.5.5 |
 
 ## Compatibility
 
@@ -16,11 +16,12 @@ This addon is **NOT** compatible with:
 - Cataclysm Classic
 - Wrath of the Lich King Classic
 - Mists of Pandaria Classic
+- WoW Classic Era (Vanilla 1.15.x)
 
 ## Version Format
 
 Tags follow the format: `v{addon_version}-{interface}`
 
-Example: `v4330-11508` means:
-- Addon version: 4330
-- Interface/Client version: 11508 (Patch 1.15.8)
+Example: `v4334-20505` means:
+- Addon version: 4334
+- Interface/Client version: 20505 (TBC Classic 2.5.5)

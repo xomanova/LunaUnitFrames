@@ -1,4 +1,4 @@
-## Interface: 11508
+## Interface: 20505
 ## Title: Luna Unit Frames
 ## Notes: A descendent of ElvUI -> oUF
 ## Author: Aviana,Xomanova
@@ -22,7 +22,7 @@ libs\LibAuraTypes\LibAuraTypes.lua
 libs\LibSpellLocks\LibSpellLocks.lua
 libs\LibTargeted\LibTargeted.lua
 libs\LibClassicCasterino\LibClassicCasterino.lua
-libs\LibClassicDurations\LibClassicDurations.xml
+# libs\LibClassicDurations\LibClassicDurations.xml # Not needed in TBC - duration info is native
 
 # oUF (Classic-compatible version bundled from working release)
 libs\oUF\init.lua
