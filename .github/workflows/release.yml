@@ -83,17 +83,17 @@ jobs:
           body: |
             ## LunaUnitFrames ${{ steps.package.outputs.tag_name }}
             
-            **Game Version:** vanilla (WoW Classic Era)
+            **Game Version:** The Burning Crusade (WoW Classic Anniversary)
             **Interface:** ${{ steps.version.outputs.interface }}
             **Addon Version:** ${{ steps.version.outputs.addon_version }}
             
             ### Installation
             1. Download `${{ steps.package.outputs.package_file }}`
-            2. Extract to your `World of Warcraft/_classic_era_/Interface/AddOns/` folder
+            2. Extract to your `World of Warcraft/_anniversary_/Interface/AddOns/` folder
             3. Restart WoW or reload your UI
             
             ### Compatibility
-            This release is for **WoW Classic Era** (Patch 1.15.x) only.
+            This release is for **WoW Classic Anniversary - TBC** (Patch 2.5.x) only.
           files: ${{ steps.package.outputs.package_file }}
           draft: false
           prerelease: false

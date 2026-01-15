@@ -366,7 +366,12 @@ local function UpdateAuras(self, event, unit)
 		local button
 		if element.buffs then
 			for i=1,(element.maxBuffs or 32) do
-				local name, _, _, _, _, _, caster = LCD:UnitAura(self.unit, i, filter)
+				local name, _, _, _, _, _, caster
+				if LCD then
+					name, _, _, _, _, _, caster = LCD:UnitAura(self.unit, i, filter)
+				else
+					name, _, _, _, _, _, caster = UnitAura(self.unit, i, filter)
+				end
 				if name or element.forceShow then
 					if element.buffFilter ~= 2 or caster == "player" then
 						updateIcon(element, self.unit, i, currentSlot, filter, false)
@@ -398,7 +403,12 @@ local function UpdateAuras(self, event, unit)
 		filter = "HARMFUL"..(element.debuffFilter == 3 and "|RAID" or "")
 		if element.debuffs then
 			for i=1,(element.maxDebuffs or 40) do
-				local name, _, _, _, _, _, caster = LCD:UnitAura(self.unit, i, filter)
+				local name, _, _, _, _, _, caster
+				if LCD then
+					name, _, _, _, _, _, caster = LCD:UnitAura(self.unit, i, filter)
+				else
+					name, _, _, _, _, _, caster = UnitAura(self.unit, i, filter)
+				end
 				if name or element.forceShow then
 					if element.debuffFilter ~= 2 or caster == "player" then
 						updateIcon(element, self.unit, i, currentSlot, filter, true)
