@@ -83,9 +83,16 @@ local function Update(self, event)
 	end
 	minXP = math.min(0, currentXP)
 	
-	local name, reaction, minRep, maxRep, currentRep = GetWatchedFactionInfo()
-	currentRep = math.abs(minRep - currentRep)
-	maxRep = math.abs(minRep - maxRep)
+	local name, reaction, minRep, maxRep, currentRep
+	if GetWatchedFactionInfo then
+		name, reaction, minRep, maxRep, currentRep = GetWatchedFactionInfo()
+	end
+	if currentRep then
+		currentRep = math.abs(minRep - currentRep)
+		maxRep = math.abs(minRep - maxRep)
+	else
+		reaction = 0
+	end
 
 	if(element.xpBar) then
 		if( UnitLevel(unit) == MAX_PLAYER_LEVEL or (UnitIsUnit(unit, "pet") and UnitLevel(unit) == UnitLevel("player")) ) then
