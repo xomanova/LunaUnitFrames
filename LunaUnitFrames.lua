@@ -480,8 +480,51 @@ function LUF:HideBlizzardFrames()
 	end
 
 	if( LUF.db.profile.hidden.party and not active_hiddens.party ) then
+		active_hiddens.party = true
+		
+		-- Hide all party member frames
 		for i = 1, MAX_PARTY_MEMBERS do
 			handleFrame(string.format("PartyMemberFrame%d", i))
+		end
+		
+		-- Hook OnShow to prevent frames from re-appearing
+		for i = 1, MAX_PARTY_MEMBERS do
+			local frame = _G["PartyMemberFrame" .. i]
+			if frame then
+				frame:HookScript("OnShow", function(self)
+					if LUF.db and LUF.db.profile and LUF.db.profile.hidden and LUF.db.profile.hidden.party then
+						self:Hide()
+					end
+				end)
+			end
+		end
+		
+		-- Hook the function that updates party frame visibility (if it exists in TBC)
+		if RaidOptionsFrame_UpdatePartyFrames then
+			hooksecurefunc("RaidOptionsFrame_UpdatePartyFrames", function()
+				if LUF.db and LUF.db.profile and LUF.db.profile.hidden and LUF.db.profile.hidden.party then
+					for i = 1, MAX_PARTY_MEMBERS do
+						local frame = _G["PartyMemberFrame" .. i]
+						if frame then
+							frame:Hide()
+						end
+					end
+				end
+			end)
+		end
+		
+		-- Hook UIParent_ManageFramePositions which can also trigger party frame updates
+		if UIParent_ManageFramePositions then
+			hooksecurefunc("UIParent_ManageFramePositions", function()
+				if LUF.db and LUF.db.profile and LUF.db.profile.hidden and LUF.db.profile.hidden.party then
+					for i = 1, MAX_PARTY_MEMBERS do
+						local frame = _G["PartyMemberFrame" .. i]
+						if frame then
+							frame:Hide()
+						end
+					end
+				end
+			end)
 		end
 	end
 
