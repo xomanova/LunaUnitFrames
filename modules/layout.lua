@@ -676,6 +676,9 @@ function LUF.InitializeUnit(frame, unit, notHeaderChild)
 		end
 	end)
 	
-	frame:SetClampedToScreen(true)
+	-- Only set SetClampedToScreen on non-header frames to avoid taint on secure frames
+	if notHeaderChild then
+		frame:SetClampedToScreen(true)
+	end
 	frame:RegisterForClicks("AnyUp")
 end
