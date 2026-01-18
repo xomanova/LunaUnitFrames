@@ -51,9 +51,13 @@ local function spellCheck(unit)
 end
 
 local function measureDistance(unit)
-	if CheckInteractDistance(unit, 3) then
+	-- Use pcall to safely call CheckInteractDistance as it's protected and can be blocked
+	local ok, result = pcall(CheckInteractDistance, unit, 3)
+	if ok and result then
 		return 10
-	elseif CheckInteractDistance(unit, 4) then
+	end
+	ok, result = pcall(CheckInteractDistance, unit, 4)
+	if ok and result then
 		return 30
 	elseif spellCheck(unit) then
 		return 40
