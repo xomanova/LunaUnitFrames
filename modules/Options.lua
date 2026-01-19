@@ -8882,5 +8882,10 @@ SlashCmdList["LUNAUF"] = function(msg)
 	end
 	
 	local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-	AceConfigDialog:Open("LunaUnitFrames")
+	local ACR = LibStub("AceConfigRegistry-3.0", true)
+	if ACR and ACR:GetOptionsTable(Addon) then
+		AceConfigDialog:Open(Addon)
+	else
+		LUF:Print("Options not yet loaded. Please wait a moment and try again.")
+	end
 end
