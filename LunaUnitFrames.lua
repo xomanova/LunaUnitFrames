@@ -427,7 +427,19 @@ function LUF:HideBlizzardFrames()
 		handleFrame(CastingBarFrame)
 		active_hiddens.cast = true
 	elseif( not LUF.db.profile.hidden.cast and not active_hiddens.cast ) then
-		CastingBarFrame_SetUnit(CastingBarFrame, "player") --restore castbar as oUF kills it
+		-- Restore castbar - CastingBarFrame_SetUnit may not exist in all Classic versions
+		if CastingBarFrame_SetUnit then
+			CastingBarFrame_SetUnit(CastingBarFrame, "player")
+		elseif CastingBarFrame then
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+		end
 	end
 
 	if( CompactRaidFrameManager ) then

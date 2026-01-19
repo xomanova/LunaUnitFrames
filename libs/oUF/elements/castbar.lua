@@ -422,9 +422,18 @@ local function Enable(self, unit)
 		element:SetScript('OnUpdate', element.OnUpdate or onUpdate)
 
 		if(self.unit == 'player' and not (self.hasChildren or self.isChild or self.isNamePlate)) then
-			CastingBarFrame_SetUnit(CastingBarFrame, nil)
-			CastingBarFrame_SetUnit(PetCastingBarFrame, nil)
-
+			-- Hide Blizzard castbars - CastingBarFrame_SetUnit may not exist in all Classic versions
+			if CastingBarFrame_SetUnit then
+				CastingBarFrame_SetUnit(CastingBarFrame, nil)
+				CastingBarFrame_SetUnit(PetCastingBarFrame, nil)
+			elseif CastingBarFrame then
+				CastingBarFrame:UnregisterAllEvents()
+				CastingBarFrame:Hide()
+				if PetCastingBarFrame then
+					PetCastingBarFrame:UnregisterAllEvents()
+					PetCastingBarFrame:Hide()
+				end
+			end
 		end
 
 		if(element:IsObjectType('StatusBar') and not element:GetStatusBarTexture()) then
@@ -471,9 +480,31 @@ local function Disable(self)
 		element:SetScript('OnUpdate', nil)
 
 		if(self.unit == 'player' and not (self.hasChildren or self.isChild or self.isNamePlate)) then
-            CastingBarFrame_SetUnit(CastingBarFrame, 'player')
-			CastingBarFrame_SetUnit(PetCastingBarFrame, 'pet')
-
+			-- Restore Blizzard castbars - CastingBarFrame_SetUnit may not exist in all Classic versions
+			if CastingBarFrame_SetUnit then
+				CastingBarFrame_SetUnit(CastingBarFrame, 'player')
+				CastingBarFrame_SetUnit(PetCastingBarFrame, 'pet')
+			elseif CastingBarFrame then
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+				CastingBarFrame:Show()
+				if PetCastingBarFrame then
+					PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
+					PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+					PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+					PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+					PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+					PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+					PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+					PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+				end
+			end
 		end
 	end
 end
