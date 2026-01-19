@@ -427,7 +427,7 @@ function LUF:HideBlizzardFrames()
 		handleFrame(CastingBarFrame)
 		active_hiddens.cast = true
 	elseif( not LUF.db.profile.hidden.cast and not active_hiddens.cast ) then
-		CastingBarFrame_OnLoad(CastingBarFrame, "player", true, false) --restore castbar as oUF kills it
+		CastingBarFrame_SetUnit(CastingBarFrame, "player") --restore castbar as oUF kills it
 	end
 
 	if( CompactRaidFrameManager ) then
