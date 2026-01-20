@@ -11,6 +11,18 @@ local oUF = LUF.oUF
 -- Disable oUFs Anti Blizzard function since we make our own
 oUF.DisableBlizzard = function() end
 
+-- Fix Blizzard bug: CompactUnitFrame_UtilSetDispelDebuff crashes when aura.dispelName is nil
+-- This happens with certain auras that don't have dispel type information
+if CompactUnitFrame_UtilSetDispelDebuff then
+	local originalSetDispelDebuff = CompactUnitFrame_UtilSetDispelDebuff
+	CompactUnitFrame_UtilSetDispelDebuff = function(dispellDebuffFrame, aura)
+		if aura and aura.dispelName == nil then
+			aura.dispelName = ""
+		end
+		return originalSetDispelDebuff(dispellDebuffFrame, aura)
+	end
+end
+
 LUF.frameIndex = {}
 
 L.player = PLAYER

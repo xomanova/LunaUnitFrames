@@ -51,16 +51,13 @@ local function spellCheck(unit)
 end
 
 local function measureDistance(unit)
-	-- Use pcall to safely call CheckInteractDistance as it's protected and can be blocked
-	local ok, result = pcall(CheckInteractDistance, unit, 3)
-	if ok and result then
-		return 10
-	end
-	ok, result = pcall(CheckInteractDistance, unit, 4)
-	if ok and result then
-		return 30
-	elseif spellCheck(unit) then
+	-- CheckInteractDistance is a protected function and causes ADDON_ACTION_BLOCKED
+	-- Use only non-protected APIs for range checking
+	if spellCheck(unit) then
 		return 40
+	elseif UnitInRange(unit) then
+		-- UnitInRange returns true for ~40 yards for friendly units
+		return 30
 	elseif UnitIsVisible(unit) then
 		return 100
 	else
