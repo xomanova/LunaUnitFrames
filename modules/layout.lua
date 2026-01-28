@@ -676,9 +676,10 @@ function LUF.InitializeUnit(frame, unit, notHeaderChild)
 		end
 	end)
 	
-	-- Only set SetClampedToScreen on non-header frames to avoid taint on secure frames
+	-- Only set SetClampedToScreen and RegisterForClicks on non-header frames to avoid taint on secure frames
+	-- Header child frames (raid/party) inherit click registration from SecureGroupHeaderTemplate
 	if notHeaderChild then
 		frame:SetClampedToScreen(true)
+		frame:RegisterForClicks("AnyUp")
 	end
-	frame:RegisterForClicks("AnyUp")
 end
