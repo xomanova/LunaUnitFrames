@@ -115,6 +115,7 @@ local UnitToFrame = {
 	["target"] = "LUFUnittarget",
 	["targettarget"] = "LUFUnittargettarget",
 	["targettargettarget"] = "LUFUnittargettargettarget",
+	["focus"] = "LUFHeaderfocus",
 	["party"] = "LUFHeaderparty",
 	["partytarget"] = "LUFHeaderpartytarget",
 	["partypet"] = "LUFHeaderpartypet",
@@ -8867,6 +8868,33 @@ SLASH_LUNAUF3 = "/lunauf"
 SLASH_LUNAUF4 = "/lunaunitframes"
 SlashCmdList["LUNAUF"] = function(msg)
 	msg = msg and string.lower(msg)
+	
+	-- Handle focus commands: /luf f, /luf f1, /luf f2, /luf f3, /luf f4, /luf f5
+	if msg then
+		local focusMatch = string.match(msg, "^f(%d?)$")
+		if focusMatch ~= nil then
+			local position = tonumber(focusMatch) or 1
+			if position >= 1 and position <= 5 then
+				if UnitExists("target") then
+					LUF:SetFocusTarget(position, "target")
+				else
+					LUF:Print("No target selected")
+				end
+				return
+			end
+		end
+		
+		-- Handle clear focus commands: /luf cf, /luf cf1, /luf cf2, etc.
+		local clearMatch = string.match(msg, "^cf(%d?)$")
+		if clearMatch ~= nil then
+			local position = tonumber(clearMatch) or 1
+			if position >= 1 and position <= 5 then
+				LUF:ClearFocusTarget(position)
+				return
+			end
+		end
+	end
+	
 	if( msg and string.match(msg, "^profile (.+)") ) then
 		local profile = string.match(msg, "^profile (.+)")
 		
@@ -8889,3 +8917,24 @@ SlashCmdList["LUNAUF"] = function(msg)
 		LUF:Print("Options not yet loaded. Please wait a moment and try again.")
 	end
 end
+
+-- Hook into the Blizzard /focus and /clearfocus commands to sync focus 1
+-- These hooks ensure that when the player uses the standard /focus command,
+-- focus position 1 in LunaUnitFrames stays in sync
+hooksecurefunc("FocusUnit", function(unit)
+	if LUF.db and not InCombatLockdown() then
+		if unit and UnitExists(unit) then
+			LUF.focusGUIDs[1] = UnitGUID(unit)
+			LUF.focusNames[1] = UnitName(unit)
+		end
+		LUF:UpdateFocusFrames()
+	end
+end)
+
+hooksecurefunc("ClearFocus", function()
+	if LUF.db and not InCombatLockdown() then
+		LUF.focusGUIDs[1] = nil
+		LUF.focusNames[1] = nil
+		LUF:UpdateFocusFrames()
+	end
+end)
