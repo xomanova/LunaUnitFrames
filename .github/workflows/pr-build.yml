@@ -31,6 +31,10 @@ jobs:
           VERSION=$(grep -i "^## Version:" *.toc | sed 's/## Version: *//' | tr -d '\r')
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           
+          # Extract interface version
+          INTERFACE=$(grep -E "^## Interface:" *.toc | sed 's/## Interface: *//' | tr -d '\r')
+          echo "interface=${INTERFACE}" >> $GITHUB_OUTPUT
+          
           # Get short SHA for artifact naming
           SHORT_SHA=$(git rev-parse --short HEAD)
           echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
@@ -40,33 +44,41 @@ jobs:
           SAFE_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
           echo "branch=${SAFE_BRANCH}" >> $GITHUB_OUTPUT
 
-      - name: Create addon package
+      - name: Build and Package Addon
+        uses: BigWigsMods/packager@v2
+        with:
+          args: -d -z
+        # -d = skip uploading to distribution sites
+        # -z = skip creating zip (we'll do it ourselves with custom naming)
+
+      - name: Create release package
+        id: package
         run: |
           ADDON_NAME="${{ steps.addon_info.outputs.addon_name }}"
+          BRANCH="${{ steps.addon_info.outputs.branch }}"
+          SHORT_SHA="${{ steps.addon_info.outputs.short_sha }}"
+          PACKAGE_NAME="${ADDON_NAME}-${BRANCH}-${SHORT_SHA}"
           
-          # Create build directory
-          mkdir -p build/${ADDON_NAME}
-          
-          # Copy addon files (exclude git, github, and dev files)
-          rsync -av --progress . build/${ADDON_NAME}/ \
-            --exclude '.git' \
-            --exclude '.github' \
-            --exclude '.gitignore' \
-            --exclude '.gitattributes' \
-            --exclude 'build' \
-            --exclude '*.md' \
-            --exclude '.luacheckrc' \
-            --exclude '.editorconfig' \
-            --exclude '.vscode'
-          
-          echo "Build complete. Contents:"
-          ls -la build/${ADDON_NAME}/
+          # The packager creates .release/LunaUnitFrames
+          if [ -d ".release/${ADDON_NAME}" ]; then
+            cd .release
+            zip -r "../${PACKAGE_NAME}.zip" "${ADDON_NAME}"
+            cd ..
+            echo "package_name=${PACKAGE_NAME}" >> $GITHUB_OUTPUT
+            echo "package_file=${PACKAGE_NAME}.zip" >> $GITHUB_OUTPUT
+            echo "✅ Package created: ${PACKAGE_NAME}.zip"
+            ls -la "${PACKAGE_NAME}.zip"
+          else
+            echo "❌ Package directory not found"
+            ls -la .release/ || echo "No .release directory"
+            exit 1
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.addon_info.outputs.addon_name }}-${{ steps.addon_info.outputs.branch }}-${{ steps.addon_info.outputs.short_sha }}
-          path: build/
+          name: ${{ steps.package.outputs.package_name }}
+          path: ${{ steps.package.outputs.package_file }}
           retention-days: 14
           if-no-files-found: error
 
@@ -78,8 +90,10 @@ jobs:
             const branch = '${{ steps.addon_info.outputs.branch }}';
             const shortSha = '${{ steps.addon_info.outputs.short_sha }}';
             const version = '${{ steps.addon_info.outputs.version }}';
+            const iface = '${{ steps.addon_info.outputs.interface }}';
             const runId = context.runId;
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${runId}`;
+            const packageName = '${{ steps.package.outputs.package_name }}';
             
             const body = `## 📦 Build Artifact Ready
             
@@ -87,6 +101,7 @@ jobs:
             |----------|-------|
             | **Addon** | ${addonName} |
             | **Version** | ${version} |
+            | **Interface** | ${iface} |
             | **Branch** | \`${branch}\` |
             | **Commit** | \`${shortSha}\` |
             
@@ -94,7 +109,7 @@ jobs:
             
             1. Go to the [workflow run](${runUrl})
             2. Scroll to **Artifacts** section
-            3. Download \`${addonName}-${branch}-${shortSha}\`
+            3. Download \`${packageName}\`
             4. Extract to your \`Interface/AddOns\` folder
             
             *Artifact will be available for 14 days.*`;
