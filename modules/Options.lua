@@ -9057,12 +9057,16 @@ SLASH_LUNAUF4 = "/lunaunitframes"
 SlashCmdList["LUNAUF"] = function(msg)
 	msg = msg and string.lower(msg)
 	
-	-- Handle focus commands: /luf f, /luf f1, /luf f2, /luf f3, /luf f4, /luf f5
+	-- Handle focus commands: /luf f2, /luf f3, /luf f4, /luf f5 (positions 2-5 only)
+	-- Position 1 must use Blizzard's /focus command
 	if msg then
 		local focusMatch = string.match(msg, "^f(%d?)$")
 		if focusMatch ~= nil then
 			local position = tonumber(focusMatch) or 1
-			if position >= 1 and position <= 5 then
+			if position == 1 then
+				LUF:Print("Focus 1 is synced with Blizzard focus. Use /focus to set your target as focus.")
+				return
+			elseif position >= 2 and position <= 5 then
 				if UnitExists("target") then
 					LUF:SetFocusTarget(position, "target")
 				else
@@ -9072,11 +9076,15 @@ SlashCmdList["LUNAUF"] = function(msg)
 			end
 		end
 		
-		-- Handle clear focus commands: /luf cf, /luf cf1, /luf cf2, etc.
+		-- Handle clear focus commands: /luf cf2, /luf cf3, etc. (positions 2-5 only)
+		-- Position 1 must use Blizzard's /clearfocus command
 		local clearMatch = string.match(msg, "^cf(%d?)$")
 		if clearMatch ~= nil then
 			local position = tonumber(clearMatch) or 1
-			if position >= 1 and position <= 5 then
+			if position == 1 then
+				LUF:Print("Focus 1 is synced with Blizzard focus. Use /clearfocus to clear it.")
+				return
+			elseif position >= 2 and position <= 5 then
 				LUF:ClearFocusTarget(position)
 				return
 			end

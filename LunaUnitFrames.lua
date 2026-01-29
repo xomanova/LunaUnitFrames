@@ -1861,9 +1861,16 @@ LUF.focusNames = {
 }
 
 -- Set a focus target by position (1-5)
--- Position 1 also sets the Blizzard focus target
+-- Position 1 is read-only and syncs with Blizzard focus (use /focus command)
+-- Positions 2-5 are custom focus slots that track by GUID
 function LUF:SetFocusTarget(position, unit)
 	if position < 1 or position > 5 then return end
+	
+	-- Position 1 is controlled by Blizzard's /focus command
+	if position == 1 then
+		self:Print("Focus 1 is synced with Blizzard focus. Use /focus to set it.")
+		return
+	end
 	
 	if InCombatLockdown() then
 		self:Print("Cannot change focus targets in combat")
@@ -1877,11 +1884,6 @@ function LUF:SetFocusTarget(position, unit)
 		self.focusGUIDs[position] = guid
 		self.focusNames[position] = name
 		
-		-- Position 1 syncs with Blizzard focus
-		if position == 1 then
-			FocusUnit(unit)
-		end
-		
 		self:UpdateFocusFrames()
 		self:Print(string.format("Focus %d set to %s", position, name or "Unknown"))
 	else
@@ -1890,8 +1892,15 @@ function LUF:SetFocusTarget(position, unit)
 end
 
 -- Clear a focus target by position
+-- Position 1 is controlled by Blizzard's /clearfocus command
 function LUF:ClearFocusTarget(position)
 	if position < 1 or position > 5 then return end
+	
+	-- Position 1 is controlled by Blizzard's /clearfocus command
+	if position == 1 then
+		self:Print("Focus 1 is synced with Blizzard focus. Use /clearfocus to clear it.")
+		return
+	end
 	
 	if InCombatLockdown() then
 		self:Print("Cannot change focus targets in combat")
@@ -1901,11 +1910,6 @@ function LUF:ClearFocusTarget(position)
 	local name = self.focusNames[position]
 	self.focusGUIDs[position] = nil
 	self.focusNames[position] = nil
-	
-	-- Position 1 clears Blizzard focus
-	if position == 1 then
-		ClearFocus()
-	end
 	
 	self:UpdateFocusFrames()
 	if name then
