@@ -8849,6 +8849,12 @@ function LUF:CreateConfig()
 						type = "toggle",
 						order = 7,
 					},
+					focus = {
+						name = FOCUS,
+						desc = string.format(L["Hides the default %s frame"], FOCUS),
+						type = "toggle",
+						order = 8,
+					},
 					party = {
 						name = PARTY,
 						desc = string.format(L["Hides the default %s frame"], PARTY),

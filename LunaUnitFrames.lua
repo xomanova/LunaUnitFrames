@@ -510,6 +510,14 @@ function LUF:HideBlizzardFrames()
 		handleFrame(TargetFrameToT)
 	end
 
+	if( LUF.db.profile.hidden.focus and not active_hiddens.focus ) then
+		handleFrame(FocusFrame)
+		if FocusFrameToT then
+			handleFrame(FocusFrameToT)
+		end
+		active_hiddens.focus = true
+	end
+
 	if( LUF.db.profile.hidden.party and not active_hiddens.party ) then
 		active_hiddens.party = true
 		
