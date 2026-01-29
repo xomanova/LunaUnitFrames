@@ -115,6 +115,7 @@ local UnitToFrame = {
 	["target"] = "LUFUnittarget",
 	["targettarget"] = "LUFUnittargettarget",
 	["targettargettarget"] = "LUFUnittargettargettarget",
+	["focus"] = "LUFHeaderfocus",
 	["party"] = "LUFHeaderparty",
 	["partytarget"] = "LUFHeaderpartytarget",
 	["partypet"] = "LUFHeaderpartypet",
@@ -5742,6 +5743,194 @@ function LUF:CreateConfig()
 					},
 				},
 			},
+			focus = {
+				name = L["focus"],
+				type = "group",
+				order = 10,
+				arg = LUF.db.profile.units.focus,
+				childGroups = "tab",
+				args = {
+					enabled = {
+						name = ENABLE,
+						desc = string.format(L["Enable the %s frame(s)"], L["focus"]),
+						type = "toggle",
+						order = 1,
+						disabled = Lockdown,
+						set = setEnableUnit,
+					},
+					GeneralOptions = {
+						name = GENERAL,
+						type = "group",
+						order = 2,
+						args = {
+							height = {
+								name = L["Height"],
+								desc = L["Set the height of the frame."],
+								type = "range",
+								order = 2.1,
+								min = 10,
+								max = 600,
+								step = 1,
+								width = "full",
+								disabled = Lockdown,
+								set = function(info, value) set(info, value) LUF:ReloadFocusFrames() end,
+							},
+							width = {
+								name = L["Width"],
+								desc = L["Set the width of the frame."],
+								type = "range",
+								order = 2.2,
+								min = 20,
+								max = 600,
+								step = 1,
+								width = "full",
+								disabled = Lockdown,
+								set = function(info, value) set(info, value) LUF:ReloadFocusFrames() end,
+							},
+							scale = {
+								name = L["Scale"],
+								desc = L["Set the scale of the frame."],
+								type = "range",
+								order = 2.3,
+								min = 0.5,
+								max = 3,
+								step = 0.01,
+								isPercent = true,
+								width = "double",
+								disabled = Lockdown,
+								set = function(info, value) set(info, value) LUF:ReloadFocusFrames() end,
+							},
+							offset = {
+								name = L["Offset"],
+								desc = L["Set the space between units."],
+								type = "range",
+								order = 2.4,
+								min = 0,
+								max = 200,
+								step = 1,
+								disabled = Lockdown,
+								set = function(info, value) set(info, value) LUF:PositionFocusFrames() end,
+							},
+							anchorTo = {
+								name = L["Anchor To"],
+								desc = L["Anchor to another frame."],
+								type = "select",
+								order = 2.5,
+								values = getAnchors,
+								set = SetAnchorTo,
+								disabled = Lockdown,
+							},
+							x = {
+								name = L["X Position"],
+								desc = L["Set the position of the frame."],
+								type = "input",
+								order = 2.6,
+								validate = nbrValidate,
+								get = getPos,
+								set = setPos,
+								disabled = Lockdown,
+							},
+							y = {
+								name = L["Y Position"],
+								desc = L["Set the position of the frame."],
+								type = "input",
+								order = 2.7,
+								validate = nbrValidate,
+								get = getPos,
+								set = setPos,
+								disabled = Lockdown,
+							},
+							attribPoint = {
+								name = L["Growth direction"],
+								desc = L["The direction in which new frames are added."],
+								type = "select",
+								order = 2.8,
+								values = {["RIGHT"] = L["Left"],["LEFT"] = L["Right"],["BOTTOM"] = L["Up"],["TOP"] = L["Down"]},
+								set = function(info, value) set(info, value) LUF:PositionFocusFrames() end,
+								disabled = Lockdown,
+							},
+							slots = {
+								name = L["Bars"],
+								type = "group",
+								order = 2.9,
+								set = set,
+								inline = true,
+								args = {
+									left = {
+										name = L["Left"],
+										type = "group",
+										order = 1,
+										args = {
+											orientation = {
+												name = L["Stacking"],
+												desc = L["Direction for stacking"],
+												type = "select",
+												order = 1,
+												values = {["vertical"] = L["Vertical"], ["horizontal"] = L["Horizontal"]},
+											},
+											value = {
+												name = L["Width"],
+												desc = L["Set the width of the bars."],
+												type = "range",
+												order = 2,
+												min = 1,
+												max = 10,
+												step = 0.1,
+											},
+										},
+									},
+									center = {
+										name = L["Center"],
+										type = "group",
+										order = 2,
+										args = {
+											orientation = {
+												name = L["Stacking"],
+												desc = L["Direction for stacking"],
+												type = "select",
+												order = 1,
+												values = {["vertical"] = L["Vertical"], ["horizontal"] = L["Horizontal"]},
+											},
+											value = {
+												name = L["Width"],
+												desc = L["Set the width of the bars."],
+												type = "range",
+												order = 2,
+												min = 1,
+												max = 10,
+												step = 0.1,
+											},
+										},
+									},
+									right = {
+										name = L["Right"],
+										type = "group",
+										order = 3,
+										args = {
+											orientation = {
+												name = L["Stacking"],
+												desc = L["Direction for stacking"],
+												type = "select",
+												order = 1,
+												values = {["vertical"] = L["Vertical"], ["horizontal"] = L["Horizontal"]},
+											},
+											value = {
+												name = L["Width"],
+												desc = L["Set the width of the bars."],
+												type = "range",
+												order = 2,
+												min = 1,
+												max = 10,
+												step = 0.1,
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			party = {
 				name = PARTY,
 				type = "group",
@@ -8660,6 +8849,12 @@ function LUF:CreateConfig()
 						type = "toggle",
 						order = 7,
 					},
+					focus = {
+						name = FOCUS,
+						desc = string.format(L["Hides the default %s frame"], FOCUS),
+						type = "toggle",
+						order = 8,
+					},
 					party = {
 						name = PARTY,
 						desc = string.format(L["Hides the default %s frame"], PARTY),
@@ -8867,6 +9062,41 @@ SLASH_LUNAUF3 = "/lunauf"
 SLASH_LUNAUF4 = "/lunaunitframes"
 SlashCmdList["LUNAUF"] = function(msg)
 	msg = msg and string.lower(msg)
+	
+	-- Handle focus commands: /luf f2, /luf f3, /luf f4, /luf f5 (positions 2-5 only)
+	-- Position 1 must use Blizzard's /focus command
+	if msg then
+		local focusMatch = string.match(msg, "^f(%d?)$")
+		if focusMatch ~= nil then
+			local position = tonumber(focusMatch) or 1
+			if position == 1 then
+				LUF:Print("Focus 1 is synced with Blizzard focus. Use /focus to set your target as focus.")
+				return
+			elseif position >= 2 and position <= 5 then
+				if UnitExists("target") then
+					LUF:SetFocusTarget(position, "target")
+				else
+					LUF:Print("No target selected")
+				end
+				return
+			end
+		end
+		
+		-- Handle clear focus commands: /luf cf2, /luf cf3, etc. (positions 2-5 only)
+		-- Position 1 must use Blizzard's /clearfocus command
+		local clearMatch = string.match(msg, "^cf(%d?)$")
+		if clearMatch ~= nil then
+			local position = tonumber(clearMatch) or 1
+			if position == 1 then
+				LUF:Print("Focus 1 is synced with Blizzard focus. Use /clearfocus to clear it.")
+				return
+			elseif position >= 2 and position <= 5 then
+				LUF:ClearFocusTarget(position)
+				return
+			end
+		end
+	end
+	
 	if( msg and string.match(msg, "^profile (.+)") ) then
 		local profile = string.match(msg, "^profile (.+)")
 		
@@ -8889,3 +9119,24 @@ SlashCmdList["LUNAUF"] = function(msg)
 		LUF:Print("Options not yet loaded. Please wait a moment and try again.")
 	end
 end
+
+-- Hook into the Blizzard /focus and /clearfocus commands to sync focus 1
+-- These hooks ensure that when the player uses the standard /focus command,
+-- focus position 1 in LunaUnitFrames stays in sync
+hooksecurefunc("FocusUnit", function(unit)
+	if LUF.db and not InCombatLockdown() then
+		if unit and UnitExists(unit) then
+			LUF.focusGUIDs[1] = UnitGUID(unit)
+			LUF.focusNames[1] = UnitName(unit)
+		end
+		LUF:UpdateFocusFrames()
+	end
+end)
+
+hooksecurefunc("ClearFocus", function()
+	if LUF.db and not InCombatLockdown() then
+		LUF.focusGUIDs[1] = nil
+		LUF.focusNames[1] = nil
+		LUF:UpdateFocusFrames()
+	end
+end)

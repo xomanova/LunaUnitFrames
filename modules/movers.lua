@@ -102,14 +102,38 @@ local function EnableMovers()
 				for key in pairs(BlacklistAttributes) do
 					frame:SetAttribute(key, nil)
 				end
-				if strmatch(unit, "^party.*$") then
+				if unit == "focus" then
+					-- Focus frames are handled specially - enable movers for each focus frame
+					for i, focusFrame in ipairs(LUF.focusFrames or {}) do
+						focusFrame.inConfigMode = true
+						focusFrame.originalUnit = focusFrame:GetAttribute("unit")
+						focusFrame:SetAttribute("unit", "player")
+						focusFrame.originalOnEnter = focusFrame.OnEnter
+						focusFrame.originalOnLeave = focusFrame.OnLeave
+						focusFrame:SetMovable(true)
+						focusFrame:SetScript("OnDragStop", OnDragStop)
+						focusFrame:SetScript("OnDragStart", OnDragStart)
+						focusFrame.OnEnter = OnEnter
+						focusFrame.OnLeave = OnLeave
+						focusFrame:RegisterForDrag("LeftButton")
+						focusFrame:Show()
+					end
+					frame:SetMovable(true)
+				elseif strmatch(unit, "^party.*$") then
 					frame:SetAttribute("unitsPerColumn", (LUF.db.profile.units.party.showPlayer or LUF.db.profile.units.party.showSolo) and 5 or 4)
+					frame:SetAttribute("startingIndex", -(config.unitsPerColumn or 5)-1)
+					enableFun(frame:GetChildren())
+					frame:SetMovable(true)
 				elseif not config.unitsPerColumn then
 					frame:SetAttribute("unitsPerColumn", 5)
+					frame:SetAttribute("startingIndex", -(config.unitsPerColumn or 5)-1)
+					enableFun(frame:GetChildren())
+					frame:SetMovable(true)
+				else
+					frame:SetAttribute("startingIndex", -(config.unitsPerColumn or 5)-1)
+					enableFun(frame:GetChildren())
+					frame:SetMovable(true)
 				end
-				frame:SetAttribute("startingIndex", -(config.unitsPerColumn or 5)-1)
-				enableFun(frame:GetChildren())
-				frame:SetMovable(true)
 			else
 				enableFun(frame)
 			end
@@ -123,11 +147,32 @@ local function DisableMovers()
 		if config.enabled then
 			frame.configMode = nil
 			if frame:GetAttribute("oUF-headerType") then
-				disableFun(frame:GetChildren())
-				frame:SetAttribute("startingIndex", 1)
-				frame:SetMovable(false)
-				frame:SetAttribute("initial-unitWatch", true)
-				LUF:SetupHeader(unit)
+				if unit == "focus" then
+					-- Focus frames are handled specially
+					for i, focusFrame in ipairs(LUF.focusFrames or {}) do
+						if focusFrame.inConfigMode then
+							focusFrame.inConfigMode = nil
+							focusFrame:SetAttribute("unit", focusFrame.originalUnit)
+							focusFrame.originalUnit = nil
+							focusFrame:SetMovable(false)
+							focusFrame:SetScript("OnDragStop", nil)
+							focusFrame:SetScript("OnDragStart", nil)
+							focusFrame.OnEnter = focusFrame.originalOnEnter
+							focusFrame.OnLeave = focusFrame.originalOnLeave
+							focusFrame.originalOnEnter = nil
+							focusFrame.originalOnLeave = nil
+							focusFrame:RegisterForDrag()
+						end
+					end
+					frame:SetMovable(false)
+					LUF:UpdateFocusFrames()
+				else
+					disableFun(frame:GetChildren())
+					frame:SetAttribute("startingIndex", 1)
+					frame:SetMovable(false)
+					frame:SetAttribute("initial-unitWatch", true)
+					LUF:SetupHeader(unit)
+				end
 			else
 				disableFun(frame)
 			end
