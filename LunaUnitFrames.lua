@@ -1436,10 +1436,10 @@ function LUF:SpawnFocusFrames(config)
 	self.frameIndex["focus"] = container
 	self.focusFrames = {}
 	
-	-- Spawn 5 focus frames
+	-- Spawn 5 focus frames - all use "focus" unit type for consistent layout
+	-- Frame 1 tracks Blizzard focus, frames 2-5 will have their unit dynamically set
 	for i = 1, 5 do
-		local unit = (i == 1) and "focus" or "player" -- Focus1 uses Blizzard focus, others start with player (will be hidden)
-		local frame = oUF:Spawn(unit, "LUFFocus"..i)
+		local frame = oUF:Spawn("focus", "LUFFocus"..i)
 		frame:SetParent(container)
 		frame:SetAttribute("oUF-guessUnit", "focus")
 		frame.focusIndex = i
