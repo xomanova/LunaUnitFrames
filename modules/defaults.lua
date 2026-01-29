@@ -1205,7 +1205,7 @@ function LUF:LoadDefaults()
 			anchorTo = "LUFUnittargettarget",
 		},
 		focus = {
-			enabled = false,
+			enabled = true,
 			healthBar = { enabled = true, background = true, backgroundAlpha = 0.2, colorType = "class", reactionType="npc", height = 6, order = 10, posSlot = "CENTER"},
 			portrait = { enabled = true, type = "3D", alignment = "LEFT", width = 0.22, height = 4, order = 15, posSlot = "CENTER"},
 			castBar = { enabled = false, background = true, backgroundAlpha = 0.2, height = 3, icon = "HIDE", autoHide = true, order = 60, posSlot = "CENTER"},

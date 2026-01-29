@@ -1778,6 +1778,13 @@ function LUF:ReloadFocusFrames()
 		end
 		LUF.PlaceModules(frame, "focus")
 		LUF.ApplySettings(frame)
+		
+		-- Apply enabled/disabled state
+		if not config.enabled and frame:IsEnabled() then
+			frame:Disable()
+		elseif config.enabled and not frame:IsEnabled() then
+			frame:Enable()
+		end
 	end
 	
 	self:PositionFocusFrames()
@@ -1978,35 +1985,46 @@ function LUF:UpdateFocusFrames()
 	
 	if not self.focusFrames then return end
 	
+	local config = self.db.profile.units.focus
+	local enabled = config and config.enabled
+	
 	for i = 1, 5 do
 		local frame = self.focusFrames[i]
 		if frame then
-			local guid = self.focusGUIDs[i]
-			local unit = nil
-			
-			if i == 1 then
-				-- Focus 1 always uses the Blizzard focus unit
-				unit = "focus"
-				-- Sync our GUID tracking with Blizzard focus
-				if UnitExists("focus") then
-					self.focusGUIDs[1] = UnitGUID("focus")
-					self.focusNames[1] = UnitName("focus")
-				else
-					self.focusGUIDs[1] = nil
-					self.focusNames[1] = nil
-				end
-			elseif guid then
-				-- For positions 2-5, find the unit by GUID
-				unit = self:FindUnitByGUID(guid)
-			end
-			
-			if unit and UnitExists(unit) then
-				frame:SetAttribute("unit", unit)
-				frame:Show()
-			else
+			-- If focus is disabled, hide all frames (except frame 1 which is managed by oUF)
+			if not enabled then
 				if i > 1 then
 					frame:SetAttribute("unit", nil)
 					frame:Hide()
+				end
+			else
+				local guid = self.focusGUIDs[i]
+				local unit = nil
+				
+				if i == 1 then
+					-- Focus 1 always uses the Blizzard focus unit
+					unit = "focus"
+					-- Sync our GUID tracking with Blizzard focus
+					if UnitExists("focus") then
+						self.focusGUIDs[1] = UnitGUID("focus")
+						self.focusNames[1] = UnitName("focus")
+					else
+						self.focusGUIDs[1] = nil
+						self.focusNames[1] = nil
+					end
+				elseif guid then
+					-- For positions 2-5, find the unit by GUID
+					unit = self:FindUnitByGUID(guid)
+				end
+				
+				if unit and UnitExists(unit) then
+					frame:SetAttribute("unit", unit)
+					frame:Show()
+				else
+					if i > 1 then
+						frame:SetAttribute("unit", nil)
+						frame:Hide()
+					end
 				end
 			end
 		end
