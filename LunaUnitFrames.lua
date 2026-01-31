@@ -851,17 +851,19 @@ function LUF.ApplySettings(frame)
 	for iname,iobj in pairs(frame.indicators) do
 		local objconfig = config.indicators[iname]
 		local objdata = LUF.IndicatorData[iname]
-		if objconfig.enabled then
-			frame:EnableElement(objdata.name)
-			if iname ~= "elite" then
-				iobj:ClearAllPoints()
-				iobj:SetPoint("CENTER", frame, objconfig.anchorPoint, objconfig.x, objconfig.y )
-				iobj:SetSize(objconfig.size, objconfig.size)
+		if objconfig and objdata then
+			if objconfig.enabled then
+				frame:EnableElement(objdata.name)
+				if iname ~= "elite" then
+					iobj:ClearAllPoints()
+					iobj:SetPoint("CENTER", frame, objconfig.anchorPoint, objconfig.x, objconfig.y )
+					iobj:SetSize(objconfig.size, objconfig.size)
+				else
+					iobj.side = objconfig.side
+				end
 			else
-				iobj.side = objconfig.side
+				frame:DisableElement(objdata.name)
 			end
-		else
-			frame:DisableElement(objdata.name)
 		end
 	end
 	
