@@ -506,9 +506,44 @@ function LUF:HideBlizzardFrames()
 	if( LUF.db.profile.hidden.party and not active_hiddens.party ) then
 		active_hiddens.party = true
 		
-		-- Hide all party member frames
-		for i = 1, MAX_PARTY_MEMBERS do
-			handleFrame(string.format("PartyMemberFrame%d", i))
+		-- Handle the newer PartyFrame container (if it exists in this client version)
+		if PartyFrame then
+			handleFrame(PartyFrame)
+			-- Handle pooled party member frames if the pool exists
+			if PartyFrame.PartyMemberFramePool then
+				for memberFrame in PartyFrame.PartyMemberFramePool:EnumerateActive() do
+					if memberFrame.HealthBarContainer and memberFrame.HealthBarContainer.HealthBar then
+						handleFrame(memberFrame)
+						handleFrame(memberFrame.HealthBarContainer.HealthBar)
+						handleFrame(memberFrame.ManaBar)
+					else
+						handleFrame(memberFrame)
+						if memberFrame.HealthBar then handleFrame(memberFrame.HealthBar) end
+						if memberFrame.ManaBar then handleFrame(memberFrame.ManaBar) end
+					end
+				end
+				PartyFrame.PartyMemberFramePool:ReleaseAll()
+			end
+		else
+			-- Classic/TBC style: Hide individual PartyMemberFrame1-4
+			for i = 1, MAX_PARTY_MEMBERS do
+				local name = "PartyMemberFrame" .. i
+				local frame = _G[name]
+				if frame then
+					handleFrame(frame)
+					-- Also handle the health and mana bars directly
+					if _G[name .. "HealthBar"] then handleFrame(_G[name .. "HealthBar"]) end
+					if _G[name .. "ManaBar"] then handleFrame(_G[name .. "ManaBar"]) end
+				end
+			end
+		end
+		
+		-- CRITICAL: This prevents UIParent from showing party frames on GROUP_ROSTER_UPDATE
+		UIParent:UnregisterEvent("GROUP_ROSTER_UPDATE")
+		
+		-- Hide CompactPartyFrame if it exists
+		if CompactPartyFrame then
+			handleFrame(CompactPartyFrame)
 		end
 		
 		-- Hook OnShow to prevent frames from re-appearing
@@ -517,7 +552,9 @@ function LUF:HideBlizzardFrames()
 			if frame then
 				frame:HookScript("OnShow", function(self)
 					if LUF.db and LUF.db.profile and LUF.db.profile.hidden and LUF.db.profile.hidden.party then
-						self:Hide()
+						if not InCombatLockdown() then
+							self:Hide()
+						end
 					end
 				end)
 			end
@@ -529,7 +566,7 @@ function LUF:HideBlizzardFrames()
 				if LUF.db and LUF.db.profile and LUF.db.profile.hidden and LUF.db.profile.hidden.party then
 					for i = 1, MAX_PARTY_MEMBERS do
 						local frame = _G["PartyMemberFrame" .. i]
-						if frame then
+						if frame and not InCombatLockdown() then
 							frame:Hide()
 						end
 					end
@@ -543,7 +580,7 @@ function LUF:HideBlizzardFrames()
 				if LUF.db and LUF.db.profile and LUF.db.profile.hidden and LUF.db.profile.hidden.party then
 					for i = 1, MAX_PARTY_MEMBERS do
 						local frame = _G["PartyMemberFrame" .. i]
-						if frame then
+						if frame and not InCombatLockdown() then
 							frame:Hide()
 						end
 					end
