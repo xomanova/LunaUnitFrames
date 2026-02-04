@@ -25,6 +25,11 @@ end
 
 LUF.frameIndex = {}
 
+-- Focus target tracking system
+-- Supports up to 5 focus targets, where focus1 syncs with the Blizzard focus target
+LUF.focusTargets = {}
+LUF.focusFrames = {}
+
 L.player = PLAYER
 L.pet = PET
 L.target = TARGET
@@ -32,6 +37,7 @@ L.party = PARTY
 L.raid = RAID
 L.maintank = MAINTANK
 L.mainassist = MAIN_ASSIST
+L.focus = FOCUS
 
 LUF.stateMonitor = CreateFrame("Frame", nil, nil, "SecureHandlerBaseTemplate")
 LUF.stateMonitor:WrapScript(LUF.stateMonitor, "OnAttributeChanged", [[
@@ -108,6 +114,7 @@ LUF.unitList = {
 	"target",
 	"targettarget",
 	"targettargettarget",
+	"focus",
 	"party",
 	"partytarget",
 	"partypet",
@@ -501,6 +508,14 @@ function LUF:HideBlizzardFrames()
 		handleFrame(TargetFrame)
 		handleFrame(ComboFrame)
 		handleFrame(TargetFrameToT)
+	end
+
+	if( LUF.db.profile.hidden.focus and not active_hiddens.focus ) then
+		handleFrame(FocusFrame)
+		if FocusFrameToT then
+			handleFrame(FocusFrameToT)
+		end
+		active_hiddens.focus = true
 	end
 
 	if( LUF.db.profile.hidden.party and not active_hiddens.party ) then
@@ -1458,6 +1473,76 @@ local refreshUnitChange = [[
 	end
 ]]
 
+-- Create the focus frames container and 5 individual focus unit frames
+function LUF:SpawnFocusFrames(config)
+	-- Create container frame for positioning
+	local container = CreateFrame("Frame", "LUFHeaderfocus", UIParent, "SecureFrameTemplate")
+	container:SetAttribute("oUF-headerType", "focus")
+	container:Show()
+	
+	self.frameIndex["focus"] = container
+	self.focusFrames = {}
+	
+	-- Spawn 5 focus frames - all use "focus" unit type for consistent layout
+	-- Frame 1 tracks Blizzard focus, frames 2-5 will have their unit dynamically set
+	for i = 1, 5 do
+		local frame = oUF:Spawn("focus", "LUFFocus"..i)
+		frame:SetParent(container)
+		frame:SetAttribute("oUF-guessUnit", "focus")
+		frame.focusIndex = i
+		
+		self.focusFrames[i] = frame
+		
+		-- For positions 2-5, hide initially since they have no target
+		if i > 1 then
+			frame:Hide()
+			frame:SetAttribute("unit", nil)
+		end
+	end
+	
+	-- Position the focus frames
+	self:PositionFocusFrames()
+end
+
+-- Position focus frames based on config
+function LUF:PositionFocusFrames()
+	local config = self.db.profile.units.focus
+	if not config or not self.focusFrames then return end
+	
+	local xMod = config.attribPoint == "LEFT" and 1 or config.attribPoint == "RIGHT" and -1 or 0
+	local yMod = config.attribPoint == "TOP" and -1 or config.attribPoint == "BOTTOM" and 1 or 0
+	
+	for i, frame in ipairs(self.focusFrames) do
+		frame:ClearAllPoints()
+		frame:SetWidth(config.width)
+		frame:SetHeight(config.height)
+		frame:SetScale(config.scale)
+		
+		if i == 1 then
+			frame:SetPoint("TOPLEFT", self.frameIndex["focus"], "TOPLEFT", 0, 0)
+		else
+			local prevFrame = self.focusFrames[i-1]
+			local xOffset = config.offset * xMod
+			local yOffset = config.offset * yMod
+			
+			if config.attribPoint == "TOP" then
+				frame:SetPoint("TOP", prevFrame, "BOTTOM", xOffset, yOffset)
+			elseif config.attribPoint == "BOTTOM" then
+				frame:SetPoint("BOTTOM", prevFrame, "TOP", xOffset, yOffset)
+			elseif config.attribPoint == "LEFT" then
+				frame:SetPoint("LEFT", prevFrame, "RIGHT", xOffset, yOffset)
+			elseif config.attribPoint == "RIGHT" then
+				frame:SetPoint("RIGHT", prevFrame, "LEFT", xOffset, yOffset)
+			else
+				frame:SetPoint("TOP", prevFrame, "BOTTOM", 0, -config.offset)
+			end
+		end
+		
+		LUF.PlaceModules(frame)
+		LUF.ApplySettings(frame)
+	end
+end
+
 function LUF:SpawnUnits()
 	oUF:RegisterStyle("LunaUnitFrames", self.InitializeUnit)
 	oUF:RegisterInitCallback(function(frame) LUF.PlaceModules(frame) LUF.ApplySettings(frame) end)
@@ -1483,6 +1568,9 @@ function LUF:SpawnUnits()
 				self.frameIndex[unit]:Show() --Set Show() early to allow child spawning
 				self.frameIndex[unit]:SetAttribute("oUF-headerType", unit)
 			end
+		elseif unit == "focus" then
+			-- Create focus frame container and 5 individual focus frames
+			self:SpawnFocusFrames(config)
 		else
 			self.frameIndex[unit] = oUF:Spawn(unit, "LUFUnit"..unit)
 			if unit == "player" then
@@ -1708,11 +1796,38 @@ function LUF:ReloadSingleUnit(unit)
 end
 
 function LUF:Reload(unit)
-	if self.HeaderFrames[unit] then
+	if unit == "focus" then
+		self:ReloadFocusFrames()
+	elseif self.HeaderFrames[unit] then
 		self:ReloadHeaderUnits(unit)
 	else
 		self:ReloadSingleUnit(unit)
 	end
+end
+
+function LUF:ReloadFocusFrames()
+	local config = self.db.profile.units.focus
+	if not config or not self.focusFrames then return end
+	
+	for i, frame in ipairs(self.focusFrames) do
+		if not LUF.InCombatLockdown then
+			frame:SetWidth(config.width)
+			frame:SetHeight(config.height)
+			frame:SetScale(config.scale)
+		end
+		LUF.PlaceModules(frame, "focus")
+		LUF.ApplySettings(frame)
+		
+		-- Apply enabled/disabled state
+		if not config.enabled and frame:IsEnabled() then
+			frame:Disable()
+		elseif config.enabled and not frame:IsEnabled() then
+			frame:Enable()
+		end
+	end
+	
+	self:PositionFocusFrames()
+	self:UpdateFocusFrames()
 end
 
 function LUF:ReloadAll()
@@ -1776,3 +1891,206 @@ function LUF:AutoswitchProfileSetup()
 		frame:RegisterEvent("GROUP_ROSTER_UPDATE")
 	end
 end
+
+-- ============================================================================
+-- Focus Frame Management System
+-- ============================================================================
+
+-- Store GUID to unit name mappings for focus targets (positions 2-5)
+-- Focus 1 is always synced with the Blizzard focus target
+LUF.focusGUIDs = {
+	[1] = nil, -- Synced with Blizzard focus
+	[2] = nil,
+	[3] = nil,
+	[4] = nil,
+	[5] = nil,
+}
+
+LUF.focusNames = {
+	[1] = nil,
+	[2] = nil,
+	[3] = nil,
+	[4] = nil,
+	[5] = nil,
+}
+
+-- Set a focus target by position (1-5)
+-- Position 1 is read-only and syncs with Blizzard focus (use /focus command)
+-- Positions 2-5 are custom focus slots that track by GUID
+function LUF:SetFocusTarget(position, unit)
+	if position < 1 or position > 5 then return end
+	
+	-- Position 1 is controlled by Blizzard's /focus command
+	if position == 1 then
+		self:Print("Focus 1 is synced with Blizzard focus. Use /focus to set it.")
+		return
+	end
+	
+	if InCombatLockdown() then
+		self:Print("Cannot change focus targets in combat")
+		return
+	end
+	
+	if unit and UnitExists(unit) then
+		local guid = UnitGUID(unit)
+		local name = UnitName(unit)
+		
+		self.focusGUIDs[position] = guid
+		self.focusNames[position] = name
+		
+		self:UpdateFocusFrames()
+		self:Print(string.format("Focus %d set to %s", position, name or "Unknown"))
+	else
+		self:ClearFocusTarget(position)
+	end
+end
+
+-- Clear a focus target by position
+-- Position 1 is controlled by Blizzard's /clearfocus command
+function LUF:ClearFocusTarget(position)
+	if position < 1 or position > 5 then return end
+	
+	-- Position 1 is controlled by Blizzard's /clearfocus command
+	if position == 1 then
+		self:Print("Focus 1 is synced with Blizzard focus. Use /clearfocus to clear it.")
+		return
+	end
+	
+	if InCombatLockdown() then
+		self:Print("Cannot change focus targets in combat")
+		return
+	end
+	
+	local name = self.focusNames[position]
+	self.focusGUIDs[position] = nil
+	self.focusNames[position] = nil
+	
+	self:UpdateFocusFrames()
+	if name then
+		self:Print(string.format("Focus %d cleared (was %s)", position, name))
+	end
+end
+
+-- Find a unit by GUID in the current environment
+function LUF:FindUnitByGUID(guid)
+	if not guid then return nil end
+	
+	-- Check common units
+	local units = {"target", "focus", "mouseover", "pet", "pettarget"}
+	for _, unit in ipairs(units) do
+		if UnitGUID(unit) == guid then
+			return unit
+		end
+	end
+	
+	-- Check party members
+	for i = 1, 4 do
+		local unit = "party" .. i
+		if UnitGUID(unit) == guid then
+			return unit
+		end
+		unit = "partypet" .. i
+		if UnitGUID(unit) == guid then
+			return unit
+		end
+	end
+	
+	-- Check raid members
+	for i = 1, 40 do
+		local unit = "raid" .. i
+		if UnitGUID(unit) == guid then
+			return unit
+		end
+		unit = "raidpet" .. i
+		if UnitGUID(unit) == guid then
+			return unit
+		end
+	end
+	
+	-- Check nameplates
+	for i = 1, 40 do
+		local unit = "nameplate" .. i
+		if UnitGUID(unit) == guid then
+			return unit
+		end
+	end
+	
+	return nil
+end
+
+-- Update focus frames to reflect current targets
+function LUF:UpdateFocusFrames()
+	if InCombatLockdown() then return end
+	
+	if not self.focusFrames then return end
+	
+	local config = self.db.profile.units.focus
+	local enabled = config and config.enabled
+	
+	for i = 1, 5 do
+		local frame = self.focusFrames[i]
+		if frame then
+			-- If focus is disabled, hide all frames (except frame 1 which is managed by oUF)
+			if not enabled then
+				if i > 1 then
+					frame:SetAttribute("unit", nil)
+					frame:Hide()
+				end
+			else
+				local guid = self.focusGUIDs[i]
+				local unit = nil
+				
+				if i == 1 then
+					-- Focus 1 always uses the Blizzard focus unit
+					unit = "focus"
+					-- Sync our GUID tracking with Blizzard focus
+					if UnitExists("focus") then
+						self.focusGUIDs[1] = UnitGUID("focus")
+						self.focusNames[1] = UnitName("focus")
+					else
+						self.focusGUIDs[1] = nil
+						self.focusNames[1] = nil
+					end
+				elseif guid then
+					-- For positions 2-5, find the unit by GUID
+					unit = self:FindUnitByGUID(guid)
+				end
+				
+				if unit and UnitExists(unit) then
+					frame:SetAttribute("unit", unit)
+					frame:Show()
+				else
+					if i > 1 then
+						frame:SetAttribute("unit", nil)
+						frame:Hide()
+					end
+				end
+			end
+		end
+	end
+end
+
+-- Sync focus 1 when Blizzard focus changes
+local focusEventFrame = CreateFrame("Frame")
+focusEventFrame:RegisterEvent("PLAYER_FOCUS_CHANGED")
+focusEventFrame:RegisterEvent("UNIT_TARGET")
+focusEventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+focusEventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+focusEventFrame:SetScript("OnEvent", function(self, event, ...)
+	if not LUF.db then return end
+	
+	if event == "PLAYER_FOCUS_CHANGED" then
+		-- Sync our focus 1 with Blizzard focus
+		if UnitExists("focus") then
+			LUF.focusGUIDs[1] = UnitGUID("focus")
+			LUF.focusNames[1] = UnitName("focus")
+		else
+			LUF.focusGUIDs[1] = nil
+			LUF.focusNames[1] = nil
+		end
+		LUF:UpdateFocusFrames()
+	elseif event == "UNIT_TARGET" or event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_ENTERING_WORLD" then
+		-- Update frames in case units moved around
+		LUF:UpdateFocusFrames()
+	end
+end)

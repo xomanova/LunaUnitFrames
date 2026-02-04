@@ -6,6 +6,7 @@ local L = {
 ["pettargettarget"] = "Pet ToT",
 ["targettarget"] = "ToT",
 ["targettargettarget"] = "ToToT",
+["focus"] = "Focus",
 ["focustarget"] = "Focus Target",
 ["focustargettarget"] = "Focus ToT",
 ["partytarget"] = "Party Target",
