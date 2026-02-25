@@ -145,7 +145,7 @@ local function GetOrCreateGlow(frame)
     
     if not element.glow then
         -- Create glow frame that covers the entire unit frame
-        local glow = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+        local glow = CreateFrame("Frame", nil, frame)
         glow:SetFrameLevel(frame:GetFrameLevel() + 5)
         glow:SetAllPoints(frame)
         
@@ -195,10 +195,8 @@ local function ShowGlow(frame, color)
     
     glow:Show()
     
-    -- Track glow expiration
-    activeGlows[frame] = {
-        expirationTime = GetTime() + GLOW_DURATION,
-    }
+    -- Track glow expiration (store expiration time directly as number)
+    activeGlows[frame] = GetTime() + GLOW_DURATION
 end
 
 -- Hide glow effect on a frame
