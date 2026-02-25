@@ -79,11 +79,13 @@ local wipe = table.wipe
 -- Constants
 local CAST_GROUP_WINDOW = 0.2  -- Time window to group heals as same cast (200ms)
 local CLEANUP_INTERVAL = 1.0   -- How often to clean up expired traces
+local GLOW_DURATION = 1.0      -- Glow always lasts 1 second
 
 -- Module state
 local activeFrames = {}        -- Frames with AoeTracer enabled (keyed by frame)
 local guidToFrames = {}        -- Map of GUID -> list of frames for that unit
 local activeTraces = {}        -- Currently active traces keyed by destGUID
+local activeGlows = {}         -- Currently active glows keyed by frame
 local castTracker = {}         -- Track casts in progress: [spellId] = {startTime, targets[], totalHealing}
 local lastCleanup = 0
 
@@ -126,15 +128,6 @@ local aoeHealSpells = {
     [34864] = true,  -- Circle of Healing Rank 3
     [34865] = true,  -- Circle of Healing Rank 4
     [34866] = true,  -- Circle of Healing Rank 5
-    
-    -- Druid
-    [740] = true,    -- Tranquility Rank 1
-    [8918] = true,   -- Tranquility Rank 2
-    [9862] = true,   -- Tranquility Rank 3
-    [9863] = true,   -- Tranquility Rank 4
-    [26983] = true,  -- Tranquility Rank 5
-    
-    -- Paladin (Holy Light via Beacon-like effects in TBC don't exist, but prep for future)
 }
 
 -- Get config value with fallback to defaults
@@ -145,8 +138,78 @@ local function GetConfig(element, key)
     return defaults[key]
 end
 
+-- Create glow texture for a frame if it doesn't exist
+local function GetOrCreateGlow(frame)
+    local element = frame.AoeTracer
+    if not element then return nil end
+    
+    if not element.glow then
+        -- Create glow frame that covers the entire unit frame
+        local glow = CreateFrame("Frame", nil, frame)
+        glow:SetFrameLevel(frame:GetFrameLevel() + 5)
+        glow:SetAllPoints(frame)
+        
+        -- Create glow textures (border style glow)
+        glow.top = glow:CreateTexture(nil, "OVERLAY")
+        glow.top:SetColorTexture(1, 1, 1, 1)
+        glow.top:SetHeight(2)
+        glow.top:SetPoint("TOPLEFT", glow, "TOPLEFT", 0, 0)
+        glow.top:SetPoint("TOPRIGHT", glow, "TOPRIGHT", 0, 0)
+        
+        glow.bottom = glow:CreateTexture(nil, "OVERLAY")
+        glow.bottom:SetColorTexture(1, 1, 1, 1)
+        glow.bottom:SetHeight(2)
+        glow.bottom:SetPoint("BOTTOMLEFT", glow, "BOTTOMLEFT", 0, 0)
+        glow.bottom:SetPoint("BOTTOMRIGHT", glow, "BOTTOMRIGHT", 0, 0)
+        
+        glow.left = glow:CreateTexture(nil, "OVERLAY")
+        glow.left:SetColorTexture(1, 1, 1, 1)
+        glow.left:SetWidth(2)
+        glow.left:SetPoint("TOPLEFT", glow, "TOPLEFT", 0, 0)
+        glow.left:SetPoint("BOTTOMLEFT", glow, "BOTTOMLEFT", 0, 0)
+        
+        glow.right = glow:CreateTexture(nil, "OVERLAY")
+        glow.right:SetColorTexture(1, 1, 1, 1)
+        glow.right:SetWidth(2)
+        glow.right:SetPoint("TOPRIGHT", glow, "TOPRIGHT", 0, 0)
+        glow.right:SetPoint("BOTTOMRIGHT", glow, "BOTTOMRIGHT", 0, 0)
+        
+        glow:Hide()
+        element.glow = glow
+    end
+    
+    return element.glow
+end
+
+-- Show glow effect on a frame
+local function ShowGlow(frame, color)
+    local glow = GetOrCreateGlow(frame)
+    if not glow then return end
+    
+    -- Set glow color
+    local r, g, b = color.r, color.g, color.b
+    glow.top:SetColorTexture(r, g, b, 0.9)
+    glow.bottom:SetColorTexture(r, g, b, 0.9)
+    glow.left:SetColorTexture(r, g, b, 0.9)
+    glow.right:SetColorTexture(r, g, b, 0.9)
+    
+    glow:Show()
+    
+    -- Track glow expiration (store expiration time directly as number)
+    activeGlows[frame] = GetTime() + GLOW_DURATION
+end
+
+-- Hide glow effect on a frame
+local function HideGlow(frame)
+    local element = frame.AoeTracer
+    if element and element.glow then
+        element.glow:Hide()
+    end
+    activeGlows[frame] = nil
+end
+
 -- Update indicator appearance for a frame
-local function UpdateIndicator(frame, targetCount, totalHealing, persistence)
+local function UpdateIndicator(frame, targetCount, totalHealing, persistence, isNewTrace)
     local element = frame.AoeTracer
     if not element then return end
     
@@ -187,6 +250,11 @@ local function UpdateIndicator(frame, targetCount, totalHealing, persistence)
     end
     
     element:Show()
+    
+    -- Show glow effect on new traces only (not refreshes)
+    if isNewTrace then
+        ShowGlow(frame, color)
+    end
     
     -- Store trace info for cleanup
     local guid = frame.unit and UnitGUID(frame.unit)
@@ -242,7 +310,7 @@ local function ProcessCastGroup(castData)
                 local element = frame.AoeTracer
                 if element and element:IsShown() or element.enabled then
                     local persistence = CalculatePersistence(element, targetCount, totalHealing, perTargetHealing)
-                    UpdateIndicator(frame, targetCount, totalHealing, persistence)
+                    UpdateIndicator(frame, targetCount, totalHealing, persistence, true)  -- true = new trace, show glow
                 end
             end
         end
@@ -332,6 +400,13 @@ local function OnUpdate(self, elapsed)
                 frame.AoeTracer:Hide()
             end
             activeTraces[guid] = nil
+        end
+    end
+    
+    -- Cleanup expired glows
+    for frame, expirationTime in pairs(activeGlows) do
+        if now >= expirationTime then
+            HideGlow(frame)
         end
     end
 end
