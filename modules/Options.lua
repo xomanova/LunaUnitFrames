@@ -1014,7 +1014,10 @@ function LUF:CreateConfig()
 			name = L["AOE Tracer"],
 			type = "group",
 			order = 10.5,
-			hidden = function(info) return info[1] ~= "raid" and info[1] ~= "party" and info[1] ~= "raidpet" and info[1] ~= "maintank" and info[1] ~= "player" and info[1] ~= "target" end,
+			hidden = function(info)
+				local unitConfig = LUF.db.profile.units[info[1]]
+				return not unitConfig or not unitConfig.aoeTracer
+			end,
 			args = {
 				description = {
 					name = L["AOE_TRACER_DESC"],
