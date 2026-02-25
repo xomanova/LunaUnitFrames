@@ -1014,7 +1014,7 @@ function LUF:CreateConfig()
 			name = L["AOE Tracer"],
 			type = "group",
 			order = 10.5,
-			hidden = function(info) return info[1] ~= "raid" and info[1] ~= "party" and info[1] ~= "raidpet" and info[1] ~= "maintank" end,
+			hidden = function(info) return info[1] ~= "raid" and info[1] ~= "party" and info[1] ~= "raidpet" and info[1] ~= "maintank" and info[1] ~= "player" and info[1] ~= "target" end,
 			args = {
 				description = {
 					name = L["AOE_TRACER_DESC"],
