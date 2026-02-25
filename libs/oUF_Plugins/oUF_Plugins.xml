@@ -18,4 +18,5 @@
 	<Script file="oUF_SimpleFader\oUF_SimpleFader.lua"/>
 	<Script file="oUF_TagsWithHeal\oUF_TagsWithHeal.lua"/>
 	<Script file="oUF_RegenTickerAlt\oUF_RegenTickerAlt.lua"/>
+	<Script file="oUF_AoeAssist\oUF_AoeAssist.lua"/>
 </Ui>

@@ -419,6 +419,17 @@ local L = {
 ["Enable the sound when switching target"] = "Enable the sound when switching target",
 ["Right click to focus"] = "Right click to focus",
 ["Focus the unit upon right clicking"] = "Focus the unit upon right clicking",
+-- AOE Assist
+["AOE Assist"] = "AOE Assist",
+["Shows an icon on the best Chain Heal target. Only available for Shamans."] = "Shows an icon on the best Chain Heal target. Only available for Shamans.",
+["Min Heal Threshold"] = "Min Heal Threshold",
+["Minimum total healing required before showing the indicator."] = "Minimum total healing required before showing the indicator.",
+["Show only best"] = "Show only best",
+["Only show the indicator on the single best target instead of all valid targets."] = "Only show the indicator on the single best target instead of all valid targets.",
+["Show heal amount"] = "Show heal amount",
+["Display the estimated total healing on the indicator."] = "Display the estimated total healing on the indicator.",
+["Show target count"] = "Show target count",
+["Display the number of targets that would be healed."] = "Display the number of targets that would be healed.",
 }
 
 LUF.L = L
