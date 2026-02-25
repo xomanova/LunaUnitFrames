@@ -1075,6 +1075,41 @@ function LUF.ApplySettings(frame)
 		end
 	end
 	
+	-- AOE Tracer
+	if frame.AoeTracer then
+		local tracerConfig = config.aoeTracer
+		if tracerConfig and tracerConfig.enabled then
+			-- Apply configuration to element
+			frame.AoeTracer.config = {
+				enabled = tracerConfig.enabled,
+				position = tracerConfig.position,
+				size = tracerConfig.size,
+				sizeUpPercent = tracerConfig.sizeUpPercent,
+				defaultPersistence = tracerConfig.defaultPersistence,
+				highPersistence = tracerConfig.highPersistence,
+				lowPersistence = tracerConfig.lowPersistence,
+				highThreshold = tracerConfig.highThreshold,
+				lowThreshold = tracerConfig.lowThreshold,
+				color1 = tracerConfig.color1,
+				color2 = tracerConfig.color2,
+				color3 = tracerConfig.color3,
+				xOffset = tracerConfig.xOffset,
+				yOffset = tracerConfig.yOffset,
+			}
+			frame.AoeTracer.enabled = true
+			
+			-- Position the indicator
+			frame.AoeTracer:ClearAllPoints()
+			frame.AoeTracer:SetSize(tracerConfig.size, tracerConfig.size)
+			frame.AoeTracer:SetPoint(tracerConfig.position, frame, tracerConfig.position, tracerConfig.xOffset, tracerConfig.yOffset)
+			
+			frame:EnableElement("AoeTracer")
+		else
+			frame.AoeTracer.enabled = false
+			frame:DisableElement("AoeTracer")
+		end
+	end
+	
 	frame:UpdateAllElements("RefreshUnit")
 end
 
