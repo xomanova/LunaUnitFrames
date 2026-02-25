@@ -1010,6 +1010,173 @@ function LUF:CreateConfig()
 				},
 			},
 		},
+		["aoeTracer"] = {
+			name = L["AOE Tracer"],
+			type = "group",
+			order = 10.5,
+			hidden = function(info) return info[1] ~= "raid" and info[1] ~= "party" and info[1] ~= "raidpet" and info[1] ~= "maintank" end,
+			args = {
+				enabled = {
+					name = ENABLE,
+					desc = L["Enable or disable the AOE healing tracer indicator."],
+					type = "toggle",
+					order = 1,
+				},
+				position = {
+					name = L["Anchor Point"],
+					desc = L["Where to anchor the indicator on the unit frame."],
+					type = "select",
+					order = 2,
+					values = { 
+						["TOPLEFT"] = L["Top left"], 
+						["TOP"] = L["Top"], 
+						["TOPRIGHT"] = L["Top right"],
+						["LEFT"] = L["Left"], 
+						["CENTER"] = L["Center"], 
+						["RIGHT"] = L["Right"],
+						["BOTTOMLEFT"] = L["Bottom left"], 
+						["BOTTOM"] = L["Bottom"], 
+						["BOTTOMRIGHT"] = L["Bottom right"],
+					},
+				},
+				size = {
+					name = L["Size"],
+					desc = L["Base size of the indicator."],
+					type = "range",
+					order = 3,
+					min = 8,
+					max = 32,
+					step = 1,
+				},
+				sizeUpPercent = {
+					name = L["Size increase %"],
+					desc = L["Percentage to increase indicator size for each additional target hit. Set to 0 for same size regardless of targets."],
+					type = "range",
+					order = 4,
+					min = 0,
+					max = 50,
+					step = 1,
+				},
+				xOffset = {
+					name = L["X Position"],
+					desc = L["Offset"],
+					type = "range",
+					order = 5,
+					min = -50,
+					max = 50,
+					step = 1,
+				},
+				yOffset = {
+					name = L["Y Position"],
+					desc = L["Offset"],
+					type = "range",
+					order = 6,
+					min = -50,
+					max = 50,
+					step = 1,
+				},
+				persistenceHeader = {
+					name = L["Persistence Settings"],
+					type = "header",
+					order = 10,
+				},
+				defaultPersistence = {
+					name = L["Default Duration"],
+					desc = L["How long the indicator shows for normal effectiveness heals (seconds)."],
+					type = "range",
+					order = 11,
+					min = 1,
+					max = 30,
+					step = 1,
+				},
+				highPersistence = {
+					name = L["High Effectiveness Duration"],
+					desc = L["How long the indicator shows when total healing exceeds the high threshold (seconds)."],
+					type = "range",
+					order = 12,
+					min = 1,
+					max = 60,
+					step = 1,
+				},
+				lowPersistence = {
+					name = L["Low Effectiveness Duration"],
+					desc = L["How long the indicator shows for low effectiveness heals (seconds)."],
+					type = "range",
+					order = 13,
+					min = 0.5,
+					max = 10,
+					step = 0.5,
+				},
+				highThreshold = {
+					name = L["High Threshold"],
+					desc = L["Total healing amount that triggers high effectiveness duration."],
+					type = "range",
+					order = 14,
+					min = 500,
+					max = 20000,
+					step = 100,
+				},
+				lowThreshold = {
+					name = L["Low Threshold"],
+					desc = L["Per-target healing below this with only 1 target triggers low effectiveness duration."],
+					type = "range",
+					order = 15,
+					min = 100,
+					max = 5000,
+					step = 50,
+				},
+				colorsHeader = {
+					name = L["Colors"],
+					type = "header",
+					order = 20,
+				},
+				color1 = {
+					name = L["1 Target Color"],
+					desc = L["Color when heal hit only 1 target."],
+					type = "color",
+					order = 21,
+					get = function(info)
+						local color = LUF.db.profile.units[info[#info-2]].aoeTracer.color1
+						return color.r, color.g, color.b
+					end,
+					set = function(info, r, g, b)
+						local color = LUF.db.profile.units[info[#info-2]].aoeTracer.color1
+						color.r, color.g, color.b = r, g, b
+						LUF:Reload()
+					end,
+				},
+				color2 = {
+					name = L["2 Target Color"],
+					desc = L["Color when heal hit 2 targets."],
+					type = "color",
+					order = 22,
+					get = function(info)
+						local color = LUF.db.profile.units[info[#info-2]].aoeTracer.color2
+						return color.r, color.g, color.b
+					end,
+					set = function(info, r, g, b)
+						local color = LUF.db.profile.units[info[#info-2]].aoeTracer.color2
+						color.r, color.g, color.b = r, g, b
+						LUF:Reload()
+					end,
+				},
+				color3 = {
+					name = L["3+ Target Color"],
+					desc = L["Color when heal hit 3 or more targets."],
+					type = "color",
+					order = 23,
+					get = function(info)
+						local color = LUF.db.profile.units[info[#info-2]].aoeTracer.color3
+						return color.r, color.g, color.b
+					end,
+					set = function(info, r, g, b)
+						local color = LUF.db.profile.units[info[#info-2]].aoeTracer.color3
+						color.r, color.g, color.b = r, g, b
+						LUF:Reload()
+					end,
+				},
+			},
+		},
 		["auras"] = {
 			name = L["Auras"],
 			type = "group",

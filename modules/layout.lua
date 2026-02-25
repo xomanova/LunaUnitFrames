@@ -567,6 +567,19 @@ function LUF.InitializeUnit(frame, unit, notHeaderChild)
 	end
 	frame.RaidStatusIndicators = RaidStatusIndicators
 
+	-- AOE Tracer Indicator (tracks AOE heal effectiveness)
+	local AoeTracer = CreateFrame("Frame", nil, frame.toplevel, "BackdropTemplate")
+	AoeTracer:SetBackdrop(backdrop)
+	AoeTracer:SetBackdropColor(0, 0, 0, 0.5)
+	AoeTracer.bg = AoeTracer:CreateTexture(nil, "BACKGROUND")
+	AoeTracer.bg:SetAllPoints()
+	AoeTracer.bg:SetColorTexture(0, 0, 0, 0.5)
+	AoeTracer.text = AoeTracer:CreateFontString(nil, "OVERLAY")
+	AoeTracer.text:SetFont(STANDARD_TEXT_FONT, 10, "OUTLINE")
+	AoeTracer.text:SetPoint("CENTER", AoeTracer, "CENTER", 0, 0)
+	AoeTracer:Hide()
+	frame.AoeTracer = AoeTracer
+
 	-- Heal Prediction
 	local otherBeforeBar = CreateFrame("StatusBar", nil, frame.Health)
 	otherBeforeBar:SetStatusBarTexture([[Interface\ChatFrame\ChatFrameBackground]])
