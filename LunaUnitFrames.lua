@@ -1075,6 +1075,23 @@ function LUF.ApplySettings(frame)
 		end
 	end
 	
+	-- AOE Assist (Chain Heal target advice for Shamans)
+	if frame.AoeAssist then
+		local aoeConfig = config.aoeAssist
+		if aoeConfig and aoeConfig.enabled then
+			frame.AoeAssist:ClearAllPoints()
+			frame.AoeAssist:SetSize(aoeConfig.size, aoeConfig.size)
+			frame.AoeAssist:SetPoint(aoeConfig.anchorPoint, frame, aoeConfig.anchorPoint, aoeConfig.x or 0, aoeConfig.y or 0)
+			frame.AoeAssist.minHealAmount = aoeConfig.minHealAmount or 3000
+			frame.AoeAssist.showOnlyBest = aoeConfig.showOnlyBest
+			frame.AoeAssist.showHealAmount = aoeConfig.showHealAmount
+			frame.AoeAssist.showTargetCount = aoeConfig.showTargetCount
+			frame:EnableElement("AoeAssist")
+		else
+			frame:DisableElement("AoeAssist")
+		end
+	end
+	
 	frame:UpdateAllElements("RefreshUnit")
 end
 

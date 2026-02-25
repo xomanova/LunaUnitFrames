@@ -567,6 +567,16 @@ function LUF.InitializeUnit(frame, unit, notHeaderChild)
 	end
 	frame.RaidStatusIndicators = RaidStatusIndicators
 
+	-- AOE Assist Indicator (Chain Heal target advice for Shamans)
+	local AoeAssist = CreateFrame("Frame", nil, frame.toplevel)
+	AoeAssist.icon = AoeAssist:CreateTexture(nil, "OVERLAY")
+	AoeAssist.icon:SetAllPoints()
+	AoeAssist.text = AoeAssist:CreateFontString(nil, "OVERLAY")
+	AoeAssist.text:SetFont(STANDARD_TEXT_FONT, 10, "OUTLINE")
+	AoeAssist.text:SetPoint("CENTER", AoeAssist, "CENTER", 0, 0)
+	AoeAssist:Hide()
+	frame.AoeAssist = AoeAssist
+
 	-- Heal Prediction
 	local otherBeforeBar = CreateFrame("StatusBar", nil, frame.Health)
 	otherBeforeBar:SetStatusBarTexture([[Interface\ChatFrame\ChatFrameBackground]])
