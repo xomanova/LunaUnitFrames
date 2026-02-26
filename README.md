@@ -41,8 +41,8 @@ The AOE Tracer helps healers visualize how effective their AOE heals are by show
 ![AOE Tracer - Color coding and persistence](assets/aoetracer_2.png)
 
 **Weighted Persistence:**
-- High effectiveness heals (high total healing) persist longer on screen (default: 20s)
-- Normal heals persist for a moderate duration (default: 10s)
+- High effectiveness heals (high total healing) persist longer on screen (default: 10s)
+- Normal heals persist for a moderate duration (default: 5s)
 - Low effectiveness heals (1 target, low healing) fade quickly (default: 1s)
 
 ![AOE Tracer - Configuration options](assets/aoetracer_3.png)
