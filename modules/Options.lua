@@ -1020,7 +1020,7 @@ function LUF:CreateConfig()
 			end,
 			args = {
 				description = {
-					name = L["AOE_TRACER_DESC"],
+					name = "Displays indicators on raid frames showing how many targets your AOE heals hit (Chain Heal, Prayer of Healing, Circle of Healing).\n\n|cff00ff00Green|r = 3+ targets (optimal)\n|cffffff00Yellow|r = 2 targets (okay)\n|cffff0000Red|r = 1 target (poor)\n\nIndicators persist longer for high-effectiveness heals and fade quickly for ineffective ones.",
 					type = "description",
 					order = 0,
 					fontSize = "medium",
