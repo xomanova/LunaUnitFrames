@@ -421,6 +421,7 @@ local L = {
 ["Focus the unit upon right clicking"] = "Focus the unit upon right clicking",
 -- AOE Tracer
 ["AOE Tracer"] = "AOE Tracer",
+["AOE_TRACER_DESC"] = "Displays indicators on raid frames showing how many targets your AOE heals hit (Chain Heal, Prayer of Healing, Circle of Healing).\n\n|cff00ff00Green|r = 3+ targets (optimal)\n|cffffff00Yellow|r = 2 targets (okay)\n|cffff0000Red|r = 1 target (poor)\n\nIndicators persist longer for high-effectiveness heals and fade quickly for ineffective ones.",
 ["Enable or disable the AOE healing tracer indicator."] = "Enable or disable the AOE healing tracer indicator.",
 ["Where to anchor the indicator on the unit frame."] = "Where to anchor the indicator on the unit frame.",
 ["Base size of the indicator."] = "Base size of the indicator.",

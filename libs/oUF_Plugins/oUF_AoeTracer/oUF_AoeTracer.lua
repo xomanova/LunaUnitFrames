@@ -95,8 +95,8 @@ local defaults = {
     position = "TOPRIGHT",
     size = 12,
     sizeUpPercent = 10,
-    defaultPersistence = 10,
-    highPersistence = 20,
+    defaultPersistence = 5,
+    highPersistence = 10,
     lowPersistence = 1,
     highThreshold = 3000,       -- Total heal amount to trigger high persistence
     lowThreshold = 500,         -- Per-target heal below this with 1 target = low persistence

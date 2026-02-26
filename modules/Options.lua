@@ -1014,8 +1014,17 @@ function LUF:CreateConfig()
 			name = L["AOE Tracer"],
 			type = "group",
 			order = 10.5,
-			hidden = function(info) return info[1] ~= "raid" and info[1] ~= "party" and info[1] ~= "raidpet" and info[1] ~= "maintank" end,
+			hidden = function(info)
+				local unitConfig = LUF.db.profile.units[info[1]]
+				return not unitConfig or not unitConfig.aoeTracer
+			end,
 			args = {
+				description = {
+					name = "Displays indicators on raid frames showing how many targets your AOE heals hit (Chain Heal, Prayer of Healing, Circle of Healing).\n\n|cff00ff00Green|r = 3+ targets (optimal)\n|cffffff00Yellow|r = 2 targets (okay)\n|cffff0000Red|r = 1 target (poor)\n\nIndicators persist longer for high-effectiveness heals and fade quickly for ineffective ones.",
+					type = "description",
+					order = 0,
+					fontSize = "medium",
+				},
 				enabled = {
 					name = ENABLE,
 					desc = L["Enable or disable the AOE healing tracer indicator."],
