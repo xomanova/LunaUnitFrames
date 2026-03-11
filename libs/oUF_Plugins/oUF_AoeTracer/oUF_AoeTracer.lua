@@ -84,7 +84,7 @@ local GLOW_DURATION = 1.0      -- Glow always lasts 1 second
 -- Module state
 local activeFrames = {}        -- Frames with AoeTracer enabled (keyed by frame)
 local guidToFrames = {}        -- Map of GUID -> list of frames for that unit
-local activeTraces = {}        -- Currently active traces keyed by destGUID
+local activeTraces = {}        -- Currently active traces keyed by frame (not GUID, to handle multiple frames per unit)
 local activeGlows = {}         -- Currently active glows keyed by frame
 local castTracker = {}         -- Track casts in progress: [spellId] = {startTime, targets[], totalHealing}
 local lastCleanup = 0
@@ -256,16 +256,12 @@ local function UpdateIndicator(frame, targetCount, totalHealing, persistence, is
         ShowGlow(frame, color)
     end
     
-    -- Store trace info for cleanup
-    local guid = frame.unit and UnitGUID(frame.unit)
-    if guid then
-        activeTraces[guid] = {
-            frame = frame,
-            targetCount = targetCount,
-            totalHealing = totalHealing,
-            expirationTime = GetTime() + persistence,
-        }
-    end
+    -- Store trace info for cleanup (keyed by frame to handle multiple frames showing same unit)
+    activeTraces[frame] = {
+        targetCount = targetCount,
+        totalHealing = totalHealing,
+        expirationTime = GetTime() + persistence,
+    }
 end
 
 -- Calculate persistence duration based on effectiveness
@@ -392,14 +388,13 @@ local function OnUpdate(self, elapsed)
         end
     end
     
-    -- Cleanup expired traces
-    for guid, traceData in pairs(activeTraces) do
+    -- Cleanup expired traces (now keyed by frame)
+    for frame, traceData in pairs(activeTraces) do
         if now >= traceData.expirationTime then
-            local frame = traceData.frame
-            if frame and frame.AoeTracer then
+            if frame.AoeTracer then
                 frame.AoeTracer:Hide()
             end
-            activeTraces[guid] = nil
+            activeTraces[frame] = nil
         end
     end
     
@@ -461,17 +456,16 @@ local function Update(self, event, unit)
     -- Update GUID mapping
     UpdateGUIDMapping(self)
     
-    -- Check if there's an active trace for this unit
-    local guid = self.unit and UnitGUID(self.unit)
-    if guid and activeTraces[guid] then
-        local traceData = activeTraces[guid]
+    -- Check if there's an active trace for this frame
+    local traceData = activeTraces[self]
+    if traceData then
         if GetTime() < traceData.expirationTime then
             -- Re-apply the indicator (in case frame was reused)
             local persistence = traceData.expirationTime - GetTime()
-            UpdateIndicator(self, traceData.targetCount, traceData.totalHealing, persistence)
+            UpdateIndicator(self, traceData.targetCount, traceData.totalHealing, persistence, false)
         else
             element:Hide()
-            activeTraces[guid] = nil
+            activeTraces[self] = nil
         end
     else
         element:Hide()
@@ -548,6 +542,9 @@ local function Disable(self)
     for guid, frames in pairs(guidToFrames) do
         frames[self] = nil
     end
+    
+    -- Remove any active trace for this frame
+    activeTraces[self] = nil
     
     -- Stop timers if no frames left
     local hasFrames = false

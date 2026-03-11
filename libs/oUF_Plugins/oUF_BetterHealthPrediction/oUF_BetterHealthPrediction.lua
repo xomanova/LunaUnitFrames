@@ -195,6 +195,8 @@ local function Enable(self)
 		element.__owner = self
 		element.ForceUpdate = ForceUpdate
 
+		-- Register both events for maximum health update responsiveness
+		self:RegisterEvent("UNIT_HEALTH", Path)
 		self:RegisterEvent("UNIT_HEALTH_FREQUENT", Path)
 		self:RegisterEvent("UNIT_MAXHEALTH", Path)
 
@@ -286,6 +288,7 @@ local function Disable(self)
 		HealComm.UnregisterCallback(element, "HealComm_GUIDDisappeared")
 
 		self:UnregisterEvent("UNIT_MAXHEALTH", Path)
+		self:UnregisterEvent("UNIT_HEALTH", Path)
 		self:UnregisterEvent("UNIT_HEALTH_FREQUENT", Path)
 	end
 end
