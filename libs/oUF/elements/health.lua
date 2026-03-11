@@ -227,7 +227,8 @@ local function SetColorTapping(element, state)
 end
 
 -- ElvUI changed block
-local onUpdateElapsed, onUpdateWait = 0, 0.25
+-- Reduced from 0.25 to 0.1 for faster updates (10x/second instead of 4x)
+local onUpdateElapsed, onUpdateWait = 0, 0.1
 local function onUpdateHealth(self, elapsed)
 	if onUpdateElapsed > onUpdateWait then
 		Path(self.__owner, 'OnUpdate', self.__owner.unit)
@@ -248,10 +249,13 @@ local function SetHealthUpdateMethod(self, state, force)
 
 		if state then
 			self.Health:SetScript('OnUpdate', onUpdateHealth)
+			self:UnregisterEvent('UNIT_HEALTH', Path)
 			self:UnregisterEvent('UNIT_HEALTH_FREQUENT', Path)
 			self:UnregisterEvent('UNIT_MAXHEALTH', Path)
 		else
 			self.Health:SetScript('OnUpdate', nil)
+			-- Register both UNIT_HEALTH and UNIT_HEALTH_FREQUENT for maximum responsiveness
+			self:RegisterEvent('UNIT_HEALTH', Path)
 			self:RegisterEvent('UNIT_HEALTH_FREQUENT', Path)
 			self:RegisterEvent('UNIT_MAXHEALTH', Path)
 		end
@@ -299,6 +303,7 @@ local function Disable(self)
 		element:Hide()
 
 		element:SetScript('OnUpdate', nil) -- ElvUI changed
+		self:UnregisterEvent('UNIT_HEALTH', Path)
 		self:UnregisterEvent('UNIT_HEALTH_FREQUENT', Path)
 		self:UnregisterEvent('UNIT_MAXHEALTH', Path)
 
